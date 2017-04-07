@@ -39,6 +39,7 @@ public class LoginActivity extends Activity {
                 login();
             }
         });
+        Toast.makeText(this, "LoginActivity.onCreate() called", Toast.LENGTH_SHORT).show();
     }
 
     @Override

@@ -7,6 +7,7 @@ import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 public class CustomLayout extends ViewGroup {
     int deviceWidth;
@@ -21,14 +22,13 @@ public class CustomLayout extends ViewGroup {
 
     public CustomLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init(context);
-    }
 
-    private void init(Context context) {
         final Display display = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
         Point deviceDisplay = new Point();
         display.getSize(deviceDisplay);
         deviceWidth = deviceDisplay.x;
+
+        Toast.makeText(getContext(), "CustomLayout constructor called", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -69,6 +69,8 @@ public class CustomLayout extends ViewGroup {
                 maxHeight = curHeight;
             curLeft += curWidth;
         }
+
+        Toast.makeText(getContext(), "CustomLayout.onLayout() called", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -106,5 +108,7 @@ public class CustomLayout extends ViewGroup {
 
         setMeasuredDimension(resolveSizeAndState(maxWidth, widthMeasureSpec, childState),
                 resolveSizeAndState(maxHeight, heightMeasureSpec, childState << MEASURED_HEIGHT_STATE_SHIFT));
+
+        Toast.makeText(getContext(), "CustomLayout.onMeasure() called", Toast.LENGTH_SHORT).show();
     }
 }
