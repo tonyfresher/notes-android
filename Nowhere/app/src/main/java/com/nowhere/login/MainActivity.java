@@ -16,7 +16,7 @@ public class MainActivity extends Activity {
         super.onCreate(bundle);
         setContentView(R.layout.main);
 
-        Log.i(CALL, "MainActivity.onCreate())");
+        Log.i(CALL, "MainActivity.onCreate()");
     }
 
     @Override
