@@ -2,8 +2,10 @@ package com.nowhere.login;
 
 import android.content.Context;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.Display;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -113,14 +115,38 @@ public class CustomLayout extends ViewGroup {
     }
 
     @Override
-    public void addView(View child) {
-        super.addView(child);
-        Toast.makeText(getContext(), "CustomLayout.addView() called", Toast.LENGTH_SHORT).show();
+    public void onViewAdded(View child) {
+        Toast.makeText(getContext(), "CustomLayout.onViewAdded() called", Toast.LENGTH_SHORT).show();
+        super.onViewAdded(child);
     }
 
     @Override
-    public void removeView(View view) {
-        super.removeView(view);
-        Toast.makeText(getContext(), "CustomLayout.removeView() called", Toast.LENGTH_SHORT).show();
+    public void onViewRemoved(View child) {
+        Toast.makeText(getContext(), "CustomLayout.onViewRemoved() called", Toast.LENGTH_SHORT).show();
+        super.onViewRemoved(child);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        Toast.makeText(getContext(), "CustomLayout.onTouchEvent() called", Toast.LENGTH_SHORT).show();
+        return super.onTouchEvent(event);
+    }
+
+    @Override
+    protected void onFocusChanged(boolean gainFocus, int direction, Rect previouslyFocusedRect) {
+        Toast.makeText(getContext(), "CustomLayout.onFocusChanged() called", Toast.LENGTH_SHORT).show();
+        super.onFocusChanged(gainFocus, direction, previouslyFocusedRect);
+    }
+
+    @Override
+    public boolean shouldDelayChildPressedState() {
+        Toast.makeText(getContext(), "CustomLayout.shouldDelayChildPressedState() called", Toast.LENGTH_SHORT).show();
+        return false;
+    }
+
+    @Override
+    public void buildLayer() {
+        Toast.makeText(getContext(), "CustomLayout.buildLayer() called", Toast.LENGTH_SHORT).show();
+        super.buildLayer();
     }
 }
