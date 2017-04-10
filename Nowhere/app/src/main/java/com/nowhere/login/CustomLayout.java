@@ -111,4 +111,16 @@ public class CustomLayout extends ViewGroup {
 
         Toast.makeText(getContext(), "CustomLayout.onMeasure() called", Toast.LENGTH_SHORT).show();
     }
+
+    @Override
+    public void addView(View child) {
+        super.addView(child);
+        Toast.makeText(getContext(), "CustomLayout.addView() called", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void removeView(View view) {
+        super.removeView(view);
+        Toast.makeText(getContext(), "CustomLayout.removeView() called", Toast.LENGTH_SHORT).show();
+    }
 }
