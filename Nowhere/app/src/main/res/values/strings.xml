@@ -1,13 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="appName">Nowhere</string>
-    <string name="email">E-mail</string>
-    <string name="password">Пароль</string>
-    <string name="signIn">Вход</string>
-    <string name="signingIn">Вход..</string>
-    <string name="emailError">Введите верный E-mail адрес</string>
-    <string name="passwordError">Пароль должен содержать больше 4 символов</string>
-    <string name="signInError">Неверный E-mail или пароль</string>
-    <string name="error">Проблемы со входом в ваш аккаунт, пожалуйста, попробуте еще раз</string>
-    <string name="success">Логин и пароль введены верно</string>
 </resources>

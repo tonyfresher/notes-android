@@ -4,14 +4,15 @@ import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.Toast;
 
 public class CustomLayout extends ViewGroup {
+    private static final String CALL = "call";
     int deviceWidth;
 
     public CustomLayout(Context context) {
@@ -30,7 +31,7 @@ public class CustomLayout extends ViewGroup {
         display.getSize(deviceDisplay);
         deviceWidth = deviceDisplay.x;
 
-        Toast.makeText(getContext(), "CustomLayout constructor called", Toast.LENGTH_SHORT).show();
+        Log.i(CALL, "CustomLayout constructor");
     }
 
     @Override
@@ -71,8 +72,7 @@ public class CustomLayout extends ViewGroup {
                 maxHeight = curHeight;
             curLeft += curWidth;
         }
-
-        Toast.makeText(getContext(), "CustomLayout.onLayout() called", Toast.LENGTH_SHORT).show();
+        Log.i(CALL, "CustomLayout.onLayout()");
     }
 
     @Override
@@ -111,42 +111,44 @@ public class CustomLayout extends ViewGroup {
         setMeasuredDimension(resolveSizeAndState(maxWidth, widthMeasureSpec, childState),
                 resolveSizeAndState(maxHeight, heightMeasureSpec, childState << MEASURED_HEIGHT_STATE_SHIFT));
 
-        Toast.makeText(getContext(), "CustomLayout.onMeasure() called", Toast.LENGTH_SHORT).show();
+        Log.i(CALL, "CustomLayout.onMeasure()");
     }
 
     @Override
     public void onViewAdded(View child) {
-        Toast.makeText(getContext(), "CustomLayout.onViewAdded() called", Toast.LENGTH_SHORT).show();
         super.onViewAdded(child);
+        Log.i(CALL, "CustomLayout.onViewAdded()");
     }
 
     @Override
     public void onViewRemoved(View child) {
-        Toast.makeText(getContext(), "CustomLayout.onViewRemoved() called", Toast.LENGTH_SHORT).show();
         super.onViewRemoved(child);
+        Log.i(CALL, "CustomLayout.onViewRemoved()");
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        Toast.makeText(getContext(), "CustomLayout.onTouchEvent() called", Toast.LENGTH_SHORT).show();
-        return super.onTouchEvent(event);
+        boolean result = super.onTouchEvent(event);
+
+        Log.i(CALL, "CustomLayout.onTouchEvent()");
+        return result;
     }
 
     @Override
     protected void onFocusChanged(boolean gainFocus, int direction, Rect previouslyFocusedRect) {
-        Toast.makeText(getContext(), "CustomLayout.onFocusChanged() called", Toast.LENGTH_SHORT).show();
         super.onFocusChanged(gainFocus, direction, previouslyFocusedRect);
+        Log.i(CALL, "CustomLayout.onFocusChanged()");
     }
 
     @Override
     public boolean shouldDelayChildPressedState() {
-        Toast.makeText(getContext(), "CustomLayout.shouldDelayChildPressedState() called", Toast.LENGTH_SHORT).show();
+        Log.i(CALL, "CustomLayout.shouldDelayChildPressedState()");
         return false;
     }
 
     @Override
     public void buildLayer() {
-        Toast.makeText(getContext(), "CustomLayout.buildLayer() called", Toast.LENGTH_SHORT).show();
         super.buildLayer();
+        Log.i(CALL, "CustomLayout.buildLayer()");
     }
 }
