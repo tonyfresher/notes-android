@@ -12,11 +12,7 @@ public class LockableScrollView extends HorizontalScrollView {
         super(context, attrs);
     }
 
-    public boolean isTouchable() {
-        return touchable;
-    }
-
-    public void setTouchEnabled(boolean enabled) {
+    public void setScrollEnabled(boolean enabled) {
         touchable = enabled;
     }
 

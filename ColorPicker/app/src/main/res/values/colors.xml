@@ -4,22 +4,6 @@
     <color name="dark">#1C1C1C</color>
     <color name="white">#FFFFFF</color>
     <color name="gray">#ECEBE4</color>
-
-    <color name="c1">#FF0000</color>
-    <color name="c2">#FF6600</color>
-    <color name="c3">#FFCC00</color>
-    <color name="c4">#CCFF00</color>
-    <color name="c5">#66FF00</color>
-    <color name="c6">#00FF00</color>
-    <color name="c7">#00FF66</color>
-    <color name="c8">#00FFCC</color>
-    <color name="c9">#00CCFF</color>
-    <color name="c10">#0066FF</color>
-    <color name="c11">#0000FF</color>
-    <color name="c12">#6600FF</color>
-    <color name="c13">#CC00FF</color>
-    <color name="c14">#FF00CC</color>
-    <color name="c15">#FF0066</color>
-    <color name="c16">#FF0000</color>
+    <color name="red">#FF3333</color>
 
 </resources>

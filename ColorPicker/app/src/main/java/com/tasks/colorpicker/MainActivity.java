@@ -10,6 +10,7 @@ import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
 import android.os.Bundle;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import butterknife.ButterKnife;
@@ -23,42 +24,12 @@ public class MainActivity extends Activity {
     TextView hsvText;
     @BindView(R.id.colorTextRGB)
     TextView rgbText;
-
-    @BindView(R.id.square_scroll)
+    @BindView(R.id.border_indicator)
+    ImageView borderIndicator;
+    @BindView(R.id.square_scroll_view)
     LockableScrollView squareScrollView;
-
-    @BindView(R.id.square1)
-    ColorSquare square1;
-    @BindView(R.id.square2)
-    ColorSquare square2;
-    @BindView(R.id.square3)
-    ColorSquare square3;
-    @BindView(R.id.square4)
-    ColorSquare square4;
-    @BindView(R.id.square5)
-    ColorSquare square5;
-    @BindView(R.id.square6)
-    ColorSquare square6;
-    @BindView(R.id.square7)
-    ColorSquare square7;
-    @BindView(R.id.square8)
-    ColorSquare square8;
-    @BindView(R.id.square9)
-    ColorSquare square9;
-    @BindView(R.id.square10)
-    ColorSquare square10;
-    @BindView(R.id.square11)
-    ColorSquare square11;
-    @BindView(R.id.square12)
-    ColorSquare square12;
-    @BindView(R.id.square13)
-    ColorSquare square13;
-    @BindView(R.id.square14)
-    ColorSquare square14;
-    @BindView(R.id.square15)
-    ColorSquare square15;
-    @BindView(R.id.square16)
-    ColorSquare square16;
+    @BindView(R.id.square_layout)
+    LinearLayout squareLayout;
 
     private static String MAIN_COLOR = "main_color";
 
@@ -68,15 +39,17 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        ColorSquare[] squares = new ColorSquare[]{
-                square1, square2, square3, square4,
-                square5, square6, square7, square8,
-                square9, square10, square11, square12,
-                square13, square14, square15, square16
+        int[] ids = new int[]{
+                R.id.square1, R.id.square2, R.id.square3, R.id.square4,
+                R.id.square5, R.id.square6, R.id.square7, R.id.square8,
+                R.id.square9, R.id.square10, R.id.square11, R.id.square12,
+                R.id.square13, R.id.square14, R.id.square15, R.id.square16
         };
-
+        ColorSquare[] squares = new ColorSquare[16];
         final int[] colors = new int[16];
+
         for (int i = 0; i < 16; i++) {
+            squares[i] = (ColorSquare) findViewById(ids[i]);
             colors[i] = Color.HSVToColor(new float[]{360 / 15 * i, 1, 1});
         }
 
@@ -84,7 +57,8 @@ public class MainActivity extends Activity {
             squares[i].setDefaultColor(colors[i]);
             squares[i].setBackgroundColor(colors[i]);
         }
-        /*PaintDrawable pd = new PaintDrawable();
+
+        PaintDrawable pd = new PaintDrawable();
         pd.setShape(new RectShape());
         pd.setShaderFactory(new ShapeDrawable.ShaderFactory() {
             @Override
@@ -92,7 +66,7 @@ public class MainActivity extends Activity {
                 return new LinearGradient(0, 0, width, 0, colors, null, Shader.TileMode.CLAMP);
             }
         });
-        squareScrollView.setBackground(pd);*/
+        squareLayout.setBackground(pd);
     }
 
     @Override
@@ -107,8 +81,7 @@ public class MainActivity extends Activity {
     }
 
     public void refresh(int color) {
-        ColorDrawable d = new ColorDrawable(color);
-        colorImage.setImageDrawable(d);
+        colorImage.setImageDrawable(new ColorDrawable(color));
         rgbText.setText(colorToRgbString(color));
         hsvText.setText(colorToHsvString(color));
     }
@@ -124,6 +97,6 @@ public class MainActivity extends Activity {
         float[] hsv = new float[3];
         Color.colorToHSV(color, hsv);
         return String.format("HSV(%s, %s%%, %s%%)",
-                (int) hsv[0], (int) hsv[1] * 100, (int) hsv[2] * 100);
+                (int) hsv[0], (int) (hsv[1] * 100), (int) (hsv[2] * 100));
     }
 }

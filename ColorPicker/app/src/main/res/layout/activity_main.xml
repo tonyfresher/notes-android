@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -32,13 +31,19 @@
             android:layout_marginRight="10dp" />
     </LinearLayout>
 
+    <ImageView
+        android:id="@+id/border_indicator"
+        android:layout_width="match_parent"
+        android:layout_height="5dp" />
+
     <com.tasks.colorpicker.LockableScrollView
-        android:id="@+id/square_scroll"
+        android:id="@+id/square_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom">
 
         <LinearLayout
+            android:id="@+id/square_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="horizontal">
@@ -53,19 +58,19 @@
 
             <com.tasks.colorpicker.ColorSquare
                 android:id="@+id/square3"
-                style="@style/ColorSquare"/>
+                style="@style/ColorSquare" />
 
             <com.tasks.colorpicker.ColorSquare
                 android:id="@+id/square4"
-                style="@style/ColorSquare"/>
+                style="@style/ColorSquare" />
 
             <com.tasks.colorpicker.ColorSquare
                 android:id="@+id/square5"
-                style="@style/ColorSquare"/>
+                style="@style/ColorSquare" />
 
             <com.tasks.colorpicker.ColorSquare
                 android:id="@+id/square6"
-                style="@style/ColorSquare"/>
+                style="@style/ColorSquare" />
 
             <com.tasks.colorpicker.ColorSquare
                 android:id="@+id/square7"
