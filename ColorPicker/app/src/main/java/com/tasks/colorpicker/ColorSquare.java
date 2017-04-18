@@ -14,8 +14,11 @@ public class ColorSquare extends ImageButton {
 
     public ColorSquare(Context context, AttributeSet attrs) {
         super(context, attrs);
-        defaultColor = ((ColorDrawable) getBackground()).getColor();
         gestureDetector = new GestureDetector(context, new GestureListener());
+    }
+
+    public void setDefaultColor(int color) {
+        defaultColor = color;
     }
 
     @Override

@@ -2,7 +2,12 @@ package com.tasks.colorpicker;
 
 import android.app.Activity;
 import android.graphics.Color;
+import android.graphics.LinearGradient;
+import android.graphics.Shader;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.PaintDrawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.RectShape;
 import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -20,7 +25,7 @@ public class MainActivity extends Activity {
     TextView rgbText;
 
     @BindView(R.id.square_scroll)
-    LockableScrollView squareScroll;
+    LockableScrollView squareScrollView;
 
     @BindView(R.id.square1)
     ColorSquare square1;
@@ -55,11 +60,50 @@ public class MainActivity extends Activity {
     @BindView(R.id.square16)
     ColorSquare square16;
 
+    private static String MAIN_COLOR = "main_color";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+
+        ColorSquare[] squares = new ColorSquare[]{
+                square1, square2, square3, square4,
+                square5, square6, square7, square8,
+                square9, square10, square11, square12,
+                square13, square14, square15, square16
+        };
+
+        final int[] colors = new int[16];
+        for (int i = 0; i < 16; i++) {
+            colors[i] = Color.HSVToColor(new float[]{360 / 15 * i, 1, 1});
+        }
+
+        for (int i = 0; i < 16; i++) {
+            squares[i].setDefaultColor(colors[i]);
+            squares[i].setBackgroundColor(colors[i]);
+        }
+        /*PaintDrawable pd = new PaintDrawable();
+        pd.setShape(new RectShape());
+        pd.setShaderFactory(new ShapeDrawable.ShaderFactory() {
+            @Override
+            public Shader resize(int width, int height) {
+                return new LinearGradient(0, 0, width, 0, colors, null, Shader.TileMode.CLAMP);
+            }
+        });
+        squareScrollView.setBackground(pd);*/
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        int color = ((ColorDrawable) colorImage.getDrawable()).getColor();
+        outState.putInt(MAIN_COLOR, color);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        refresh(savedInstanceState.getInt(MAIN_COLOR, 0));
     }
 
     public void refresh(int color) {
@@ -80,6 +124,6 @@ public class MainActivity extends Activity {
         float[] hsv = new float[3];
         Color.colorToHSV(color, hsv);
         return String.format("HSV(%s, %s%%, %s%%)",
-                (int) hsv[0], (int) hsv[1], (int) hsv[2]);
+                (int) hsv[0], (int) hsv[1] * 100, (int) hsv[2] * 100);
     }
 }

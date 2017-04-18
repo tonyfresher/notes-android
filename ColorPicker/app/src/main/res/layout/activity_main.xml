@@ -32,7 +32,6 @@
             android:layout_marginRight="10dp" />
     </LinearLayout>
 
-
     <com.tasks.colorpicker.LockableScrollView
         android:id="@+id/square_scroll"
         android:layout_width="match_parent"
@@ -46,83 +45,67 @@
 
             <com.tasks.colorpicker.ColorSquare
                 android:id="@+id/square1"
-                style="@style/ColorSquare"
-                android:background="@color/c1" />
+                style="@style/ColorSquare" />
 
             <com.tasks.colorpicker.ColorSquare
                 android:id="@+id/square2"
-                style="@style/ColorSquare"
-                android:background="@color/c2" />
+                style="@style/ColorSquare" />
 
             <com.tasks.colorpicker.ColorSquare
                 android:id="@+id/square3"
-                style="@style/ColorSquare"
-                android:background="@color/c3" />
+                style="@style/ColorSquare"/>
 
             <com.tasks.colorpicker.ColorSquare
                 android:id="@+id/square4"
-                style="@style/ColorSquare"
-                android:background="@color/c4" />
+                style="@style/ColorSquare"/>
 
             <com.tasks.colorpicker.ColorSquare
                 android:id="@+id/square5"
-                style="@style/ColorSquare"
-                android:background="@color/c5" />
+                style="@style/ColorSquare"/>
 
             <com.tasks.colorpicker.ColorSquare
                 android:id="@+id/square6"
-                style="@style/ColorSquare"
-                android:background="@color/c6" />
+                style="@style/ColorSquare"/>
 
             <com.tasks.colorpicker.ColorSquare
                 android:id="@+id/square7"
-                style="@style/ColorSquare"
-                android:background="@color/c7" />
+                style="@style/ColorSquare" />
 
             <com.tasks.colorpicker.ColorSquare
                 android:id="@+id/square8"
-                style="@style/ColorSquare"
-                android:background="@color/c8" />
+                style="@style/ColorSquare" />
 
             <com.tasks.colorpicker.ColorSquare
                 android:id="@+id/square9"
-                style="@style/ColorSquare"
-                android:background="@color/c9" />
+                style="@style/ColorSquare" />
 
             <com.tasks.colorpicker.ColorSquare
                 android:id="@+id/square10"
-                style="@style/ColorSquare"
-                android:background="@color/c10" />
+                style="@style/ColorSquare" />
 
             <com.tasks.colorpicker.ColorSquare
                 android:id="@+id/square11"
-                style="@style/ColorSquare"
-                android:background="@color/c11" />
+                style="@style/ColorSquare" />
 
             <com.tasks.colorpicker.ColorSquare
                 android:id="@+id/square12"
-                style="@style/ColorSquare"
-                android:background="@color/c12" />
+                style="@style/ColorSquare" />
 
             <com.tasks.colorpicker.ColorSquare
                 android:id="@+id/square13"
-                style="@style/ColorSquare"
-                android:background="@color/c13" />
+                style="@style/ColorSquare" />
 
             <com.tasks.colorpicker.ColorSquare
                 android:id="@+id/square14"
-                style="@style/ColorSquare"
-                android:background="@color/c14" />
+                style="@style/ColorSquare" />
 
             <com.tasks.colorpicker.ColorSquare
                 android:id="@+id/square15"
-                style="@style/ColorSquare"
-                android:background="@color/c15" />
+                style="@style/ColorSquare" />
 
             <com.tasks.colorpicker.ColorSquare
                 android:id="@+id/square16"
-                style="@style/ColorSquare"
-                android:background="@color/c16" />
+                style="@style/ColorSquare" />
         </LinearLayout>
 
     </com.tasks.colorpicker.LockableScrollView>
