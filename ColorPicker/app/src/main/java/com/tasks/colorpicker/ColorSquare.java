@@ -3,14 +3,12 @@ package com.tasks.colorpicker;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.ShapeDrawable;
 import android.os.Vibrator;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.widget.ImageButton;
-import android.widget.Toast;
 
 public class ColorSquare extends ImageButton {
     private int defaultColor;
@@ -21,6 +19,11 @@ public class ColorSquare extends ImageButton {
 
     public ColorSquare(Context context, AttributeSet attrs) {
         super(context, attrs);
+        gestureDetector = new GestureDetector(context, new GestureListener());
+    }
+
+    public ColorSquare(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
         gestureDetector = new GestureDetector(context, new GestureListener());
     }
 
@@ -37,7 +40,7 @@ public class ColorSquare extends ImageButton {
     }
 
     private void changeColor(float dX, float dY) {
-        if (Math.abs(dX) < 1e-5 || Math.abs(dY) < 1e-5)
+        if (Math.abs(dX) < 1e-5 && Math.abs(dY) < 1e-5)
             return;
 
         float[] def = new float[3];
@@ -52,14 +55,14 @@ public class ColorSquare extends ImageButton {
         else
             hsv[2] += dY / 100;
 
-        if (hsv[0] <= def[0] - 12 || hsv[0] >= def[0] + 12 || hsv[2] > 1 || hsv[2] < 0.01) {
-            getMainActivity().borderIndicator
-                    .setBackgroundColor(ContextCompat.getColor(getContext(), R.color.red));
+        int border = MainActivity.COLOR_STEP / 2;
+        if (hsv[0] <= def[0] - border || hsv[0] >= def[0] + border
+                || hsv[2] > 1 || hsv[2] < 1E-2) {
+            getMainActivity().setBorderIndicatorColor(ContextCompat.getColor(getContext(), R.color.red));
             return;
         }
 
-        getMainActivity().borderIndicator
-                .setBackgroundColor(ContextCompat.getColor(getContext(), R.color.white));
+        getMainActivity().setBorderIndicatorColor(ContextCompat.getColor(getContext(), R.color.white));
 
         int newColor = Color.HSVToColor(hsv);
         setBackgroundColor(newColor);
@@ -80,9 +83,9 @@ public class ColorSquare extends ImageButton {
     private class GestureListener extends GestureDetector.SimpleOnGestureListener {
         @Override
         public boolean onDown(MotionEvent e) {
-            prevX = 50;
-            prevY = 50;
-            getMainActivity().squareScrollView.setScrollEnabled(true);
+            prevX = e.getX();
+            prevY = e.getY();
+            getMainActivity().setSquareScrollViewEnabled(true);
             isInEditMode = false;
             return true;
         }
@@ -102,7 +105,7 @@ public class ColorSquare extends ImageButton {
 
         @Override
         public void onLongPress(MotionEvent e) {
-            getMainActivity().squareScrollView.setScrollEnabled(false);
+            getMainActivity().setSquareScrollViewEnabled(false);
             isInEditMode = true;
             Vibrator v = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
             v.vibrate(100);

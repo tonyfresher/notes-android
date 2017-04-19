@@ -15,7 +15,7 @@
         <item name="android:colorButtonNormal">@color/gray</item>
     </style>
 
-    <style name="ColorSquare">
+    <style name="ColorSquare" parent="@android:style/Widget.ImageButton">
         <item name="android:layout_width">72dp</item>
         <item name="android:layout_height">72dp</item>
         <item name="android:layout_margin">18dp</item>

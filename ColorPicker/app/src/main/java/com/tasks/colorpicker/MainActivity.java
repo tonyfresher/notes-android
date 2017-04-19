@@ -1,6 +1,7 @@
 package com.tasks.colorpicker;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Shader;
@@ -9,6 +10,8 @@ import android.graphics.drawable.PaintDrawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -31,6 +34,9 @@ public class MainActivity extends Activity {
     @BindView(R.id.square_layout)
     LinearLayout squareLayout;
 
+    ColorSquare[] squares = new ColorSquare[COLORS_COUNT];
+    public static int COLORS_COUNT = 16;
+    public static int COLOR_STEP = 360 / (COLORS_COUNT - 1);
     private static String MAIN_COLOR = "main_color";
 
     @Override
@@ -39,23 +45,22 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        int[] ids = new int[]{
-                R.id.square1, R.id.square2, R.id.square3, R.id.square4,
-                R.id.square5, R.id.square6, R.id.square7, R.id.square8,
-                R.id.square9, R.id.square10, R.id.square11, R.id.square12,
-                R.id.square13, R.id.square14, R.id.square15, R.id.square16
-        };
-        ColorSquare[] squares = new ColorSquare[16];
-        final int[] colors = new int[16];
+        final int[] colors = new int[COLORS_COUNT];
+        for (int i = 0; i < COLORS_COUNT; i++) {
+            ColorSquare square = new ColorSquare(this, null, 0, R.style.ColorSquare);
 
-        for (int i = 0; i < 16; i++) {
-            squares[i] = (ColorSquare) findViewById(ids[i]);
-            colors[i] = Color.HSVToColor(new float[]{360 / 15 * i, 1, 1});
-        }
+            int color = Color.HSVToColor(new float[]{COLOR_STEP * i, 1, 1});
+            square.setDefaultColor(color);
+            square.setBackgroundColor(color);
 
-        for (int i = 0; i < 16; i++) {
-            squares[i].setDefaultColor(colors[i]);
-            squares[i].setBackgroundColor(colors[i]);
+            LinearLayout.LayoutParams lp =
+                    new LinearLayout.LayoutParams(convertDpToPx(this, 72), convertDpToPx(this, 72));
+            int margin = convertDpToPx(this, 18);
+            lp.setMargins(margin, margin, margin, margin);
+            squareLayout.addView(square, lp);
+
+            squares[i] = square;
+            colors[i] = color;
         }
 
         PaintDrawable pd = new PaintDrawable();
@@ -73,17 +78,36 @@ public class MainActivity extends Activity {
     protected void onSaveInstanceState(Bundle outState) {
         int color = ((ColorDrawable) colorImage.getDrawable()).getColor();
         outState.putInt(MAIN_COLOR, color);
+
+        for (int i = 0; i < COLORS_COUNT; i++) {
+            outState.putInt(
+                    String.format("square%s_color", i),
+                    squares[i].getBackgroundColor());
+        }
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         refresh(savedInstanceState.getInt(MAIN_COLOR, 0));
+
+        for (int i = 0; i < COLORS_COUNT; i++) {
+            squares[i].setBackgroundColor(
+                    savedInstanceState.getInt(String.format("square%s_color", i)));
+        }
     }
 
     public void refresh(int color) {
         colorImage.setImageDrawable(new ColorDrawable(color));
         rgbText.setText(colorToRgbString(color));
         hsvText.setText(colorToHsvString(color));
+    }
+
+    public void setBorderIndicatorColor(int color) {
+        borderIndicator.setBackgroundColor(color);
+    }
+
+    public void setSquareScrollViewEnabled(boolean scrollable) {
+        squareScrollView.setScrollEnabled(scrollable);
     }
 
     private static String colorToRgbString(int color) {
@@ -99,4 +123,10 @@ public class MainActivity extends Activity {
         return String.format("HSV(%s, %s%%, %s%%)",
                 (int) hsv[0], (int) (hsv[1] * 100), (int) (hsv[2] * 100));
     }
+
+    private static int convertDpToPx(Context context, float dp) {
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, metrics);
+    }
+
 }
