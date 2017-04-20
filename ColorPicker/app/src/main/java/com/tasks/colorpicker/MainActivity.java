@@ -37,7 +37,8 @@ public class MainActivity extends Activity {
     ColorSquare[] squares = new ColorSquare[COLORS_COUNT];
     public static int COLORS_COUNT = 16;
     public static int COLOR_STEP = 360 / (COLORS_COUNT - 1);
-    private static String MAIN_COLOR = "main_color";
+    private static String MAIN_COLOR_TAG = "main_color";
+    private static String COLORS_TAG = "squares_colors";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,23 +78,22 @@ public class MainActivity extends Activity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         int color = ((ColorDrawable) colorImage.getDrawable()).getColor();
-        outState.putInt(MAIN_COLOR, color);
+        outState.putInt(MAIN_COLOR_TAG, color);
 
-        for (int i = 0; i < COLORS_COUNT; i++) {
-            outState.putInt(
-                    String.format("square%s_color", i),
-                    squares[i].getBackgroundColor());
-        }
+        int[] colors = new int[COLORS_COUNT];
+        for (int i = 0; i < COLORS_COUNT; i++)
+            colors[i] = squares[i].getBackgroundColor();
+
+        outState.putIntArray(COLORS_TAG, colors);
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        refresh(savedInstanceState.getInt(MAIN_COLOR, 0));
+        refresh(savedInstanceState.getInt(MAIN_COLOR_TAG, 0));
 
-        for (int i = 0; i < COLORS_COUNT; i++) {
-            squares[i].setBackgroundColor(
-                    savedInstanceState.getInt(String.format("square%s_color", i)));
-        }
+        int[] colors = savedInstanceState.getIntArray(COLORS_TAG);
+        for (int i = 0; i < COLORS_COUNT; i++)
+            squares[i].setBackgroundColor(colors[i]);
     }
 
     public void refresh(int color) {
