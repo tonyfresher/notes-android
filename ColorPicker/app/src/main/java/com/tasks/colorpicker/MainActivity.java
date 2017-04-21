@@ -55,8 +55,8 @@ public class MainActivity extends Activity {
             square.setBackgroundColor(color);
 
             LinearLayout.LayoutParams lp =
-                    new LinearLayout.LayoutParams(convertDpToPx(this, 72), convertDpToPx(this, 72));
-            int margin = convertDpToPx(this, 18);
+                    new LinearLayout.LayoutParams(convertDpToPx(72), convertDpToPx(72));
+            int margin = convertDpToPx(18);
             lp.setMargins(margin, margin, margin, margin);
             squareLayout.addView(square, lp);
 
@@ -81,8 +81,9 @@ public class MainActivity extends Activity {
         outState.putInt(MAIN_COLOR_TAG, color);
 
         int[] colors = new int[COLORS_COUNT];
-        for (int i = 0; i < COLORS_COUNT; i++)
+        for (int i = 0; i < COLORS_COUNT; i++) {
             colors[i] = squares[i].getBackgroundColor();
+        }
 
         outState.putIntArray(COLORS_TAG, colors);
     }
@@ -92,8 +93,9 @@ public class MainActivity extends Activity {
         refresh(savedInstanceState.getInt(MAIN_COLOR_TAG, 0));
 
         int[] colors = savedInstanceState.getIntArray(COLORS_TAG);
-        for (int i = 0; i < COLORS_COUNT; i++)
+        for (int i = 0; i < COLORS_COUNT; i++) {
             squares[i].setBackgroundColor(colors[i]);
+        }
     }
 
     public void refresh(int color) {
@@ -124,8 +126,8 @@ public class MainActivity extends Activity {
                 (int) hsv[0], (int) (hsv[1] * 100), (int) (hsv[2] * 100));
     }
 
-    private static int convertDpToPx(Context context, float dp) {
-        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+    private int convertDpToPx(float dp) {
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, metrics);
     }
 

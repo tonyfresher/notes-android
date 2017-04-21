@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Many Colors</string>
+    <string name="preferences_file">com.tasks.multiplescreens.preferences</string>
+</resources>
