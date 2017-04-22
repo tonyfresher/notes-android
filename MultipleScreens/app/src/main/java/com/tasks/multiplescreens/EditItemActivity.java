@@ -4,7 +4,9 @@ import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import butterknife.BindView;
@@ -33,9 +35,12 @@ public class EditItemActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         if (getIntent().hasExtra(ItemContent.NAME)) {
-            item = (ItemContent) getIntent().getSerializableExtra(ItemContent.NAME);
             isNewItem = false;
+
+            item = (ItemContent) getIntent().getSerializableExtra(ItemContent.NAME);
             initFromItem();
+
+            findViewById(R.id.edit_delete).setVisibility(View.VISIBLE);
         } else {
             item = new ItemContent();
         }
@@ -65,6 +70,11 @@ public class EditItemActivity extends AppCompatActivity {
             appBarLayout.setBackgroundColor(item.color);
     }
 
+    @OnClick(R.id.edit_exit)
+    public void exit() {
+        finish();
+    }
+
     @OnClick(R.id.edit_save)
     public void trySaveAndExit() {
         if (getName().equals("")) {
@@ -75,8 +85,9 @@ public class EditItemActivity extends AppCompatActivity {
         finish();
     }
 
-    @OnClick(R.id.edit_exit)
-    public void exit() {
+    @OnClick(R.id.edit_save)
+    public void deleteAndExit() {
+        deleteItem();
         finish();
     }
 
