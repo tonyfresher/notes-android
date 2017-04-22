@@ -13,8 +13,6 @@
         android:layout_height="wrap_content"
         android:layout_alignWithParentIfMissing="true"
         android:layout_centerVertical="true"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
         android:orientation="vertical"
         android:paddingBottom="16dp"
         android:paddingTop="16dp">
