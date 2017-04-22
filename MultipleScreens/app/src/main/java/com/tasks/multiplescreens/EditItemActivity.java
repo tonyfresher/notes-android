@@ -104,7 +104,7 @@ public class EditItemActivity extends AppCompatActivity {
     }
 
     private ImageView makeColorSquare(final int color, final ImageView[] squares) {
-        ImageView square = new ImageView(this, null, 0, R.style.ColorSquare);
+        ImageView square = new ImageView(this);
 
         square.setBackgroundColor(color);
         square.setImageDrawable(getDrawable(R.drawable.frame));
