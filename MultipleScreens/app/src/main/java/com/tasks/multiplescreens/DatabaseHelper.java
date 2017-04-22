@@ -22,7 +22,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         String tableEmp = String.format(
-                "CREATE TABLE %s(%s INTEGER PRIMARY KEY AUTOINCREMENT, %s TEXT NOT NULL, %s TEXT, %s INT)",
+                "CREATE TABLE %s(%s INTEGER PRIMARY KEY AUTOINCREMENT, %s TEXT, %s TEXT, %s INT)",
                 TABLE_NAME, ITEM_ROWID, ITEM_NAME, ITEM_DESCRIPTION, ITEM_COLOR);
         db.execSQL(tableEmp);
     }
@@ -33,13 +33,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public void deleteData(int row) {
-        try (SQLiteDatabase db = this.getWritableDatabase()) {
-            db.delete(TABLE_NAME, String.format("%s=%s", ITEM_ROWID, row), null);
-        }
-    }
-
-    public void insertData(ItemContent item) {
+    public void insert(ItemContent item) {
         ContentValues values = new ContentValues();
         values.put(ITEM_NAME, item.name);
         values.put(ITEM_DESCRIPTION, item.description);
@@ -47,6 +41,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         try (SQLiteDatabase db = this.getWritableDatabase()) {
             db.insert(TABLE_NAME, null, values);
+        }
+    }
+
+    public void replace(int row, ItemContent newItem) {
+        ContentValues values = new ContentValues();
+        values.put(ITEM_NAME, newItem.name);
+        values.put(ITEM_DESCRIPTION, newItem.description);
+        values.put(ITEM_COLOR, newItem.color);
+
+        try (SQLiteDatabase db = this.getWritableDatabase()) {
+            db.update(TABLE_NAME, values,
+                    String.format("%s=?", ITEM_ROWID),
+                    new String[]{Integer.toString(row)});
+        }
+    }
+
+    public void delete(int row) {
+        try (SQLiteDatabase db = this.getWritableDatabase()) {
+            db.delete(TABLE_NAME, String.format("%s=%s", ITEM_ROWID, row), null);
         }
     }
 
@@ -64,11 +77,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 int iColor = cursor.getColumnIndex(ITEM_COLOR);
 
                 do {
-                    ItemContent item = new ItemContent();
-                    item.id = cursor.getInt(iRow);
-                    item.name = cursor.getString(iName);
-                    item.description = cursor.getString(iDescription);
-                    item.color = cursor.getInt(iColor);
+                    ItemContent item = new ItemContent(
+                            cursor.getInt(iRow),
+                            cursor.getString(iName),
+                            cursor.getString(iDescription),
+                            cursor.getInt(iColor));
 
                     items.add(item);
                 } while (cursor.moveToNext());

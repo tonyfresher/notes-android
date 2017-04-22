@@ -1,26 +1,27 @@
 package com.tasks.multiplescreens;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import java.io.Serializable;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class ListActivity extends AppCompatActivity {
+    @BindView(R.id.items_list)
+    ListView list;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list);
-
-        ListView list = (ListView) findViewById(R.id.items_list);
-
-        DataAdapter adapter = new DataAdapter(this, getDataSet());
-        list.setAdapter(adapter);
+        ButterKnife.bind(this);
 
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -28,7 +29,7 @@ public class ListActivity extends AppCompatActivity {
                 ItemContent item = (ItemContent) parent.getItemAtPosition(position);
 
                 Intent intent = new Intent(view.getContext(), EditItemActivity.class);
-                intent.putExtra(ItemContent.NAME, item);
+                intent.putExtra(ItemContent.NAME, (Serializable) item);
                 startActivity(intent);
             }
         });
@@ -41,6 +42,13 @@ public class ListActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        DataAdapter adapter = new DataAdapter(this, getDataSet());
+        list.setAdapter(adapter);
     }
 
     private ItemContent[] getDataSet() {

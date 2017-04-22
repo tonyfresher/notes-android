@@ -4,27 +4,89 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical"
     tools:context="com.tasks.multiplescreens.EditItemActivity">
 
     <android.support.design.widget.AppBarLayout
+        android:id="@+id/edit_app_bar_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/edit_app_bar_height"
+        android:background="?attr/colorPrimary"
+        android:fitsSystemWindows="true"
         android:theme="@style/AppTheme.AppBarOverlay">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/edit_toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
+            android:fitsSystemWindows="true"
             app:popupTheme="@style/AppTheme.PopupOverlay">
-            <ImageButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-            <ImageButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+
+            <RelativeLayout
+                android:id="@+id/edit_toolbar_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/edit_exit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerInParent="true"
+                    android:paddingEnd="20dp"
+                    android:src="@drawable/ic_clear_white_24dp" />
+
+                <TextView
+                    android:id="@+id/edit_save"
+                    style="@style/TextAppearance.AppCompat.Body2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerInParent="true"
+                    android:gravity="center_vertical"
+                    android:paddingEnd="20dp"
+                    android:paddingStart="20dp"
+                    android:text="@string/edit_save" />
+
+            </RelativeLayout>
+
         </android.support.v7.widget.Toolbar>
 
+        <TextView
+            style="@style/TextAppearance.AppCompat.Subhead"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            android:text="@string/edit_change_color" />
+
+        <HorizontalScrollView
+            android:id="@+id/edit_colors"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        </HorizontalScrollView>
+
     </android.support.design.widget.AppBarLayout>
+
+    <EditText
+        android:id="@+id/edit_name"
+        style="@style/FullWidthEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/edit_name"
+        android:textStyle="bold" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/darker_gray" />
+
+    <EditText
+        android:id="@+id/edit_description"
+        style="@style/FullWidthEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/edit_description" />
 
 </LinearLayout>
