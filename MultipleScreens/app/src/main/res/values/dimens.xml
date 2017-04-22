@@ -1,5 +1,4 @@
 <resources>
-    <dimen name="fab_margin">16dp</dimen>
     <dimen name="edit_app_bar_height">112dp</dimen>
     <dimen name="item_description_width">290dp</dimen>
     <dimen name="color_square_size">36dp</dimen>
