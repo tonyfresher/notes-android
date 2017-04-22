@@ -45,9 +45,9 @@
                     <TextView
                         android:id="@+id/edit_delete"
                         style="@style/AppBarTextButton"
-                        android:layout_toStartOf="@id/edit_save"
                         android:text="@string/edit_delete"
                         android:visibility="gone" />
+                        <!--android:layout_toStartOf="@id/edit_save"-->
 
                     <TextView
                         android:id="@+id/edit_save"

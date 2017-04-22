@@ -85,7 +85,7 @@ public class EditItemActivity extends AppCompatActivity {
         finish();
     }
 
-    @OnClick(R.id.edit_save)
+    @OnClick(R.id.edit_delete)
     public void deleteAndExit() {
         deleteItem();
         finish();

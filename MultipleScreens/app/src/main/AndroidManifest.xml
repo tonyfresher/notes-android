@@ -21,7 +21,8 @@
         <activity
             android:name=".EditItemActivity"
             android:parentActivityName=".ListActivity"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden"></activity>
     </application>
 
 </manifest>
