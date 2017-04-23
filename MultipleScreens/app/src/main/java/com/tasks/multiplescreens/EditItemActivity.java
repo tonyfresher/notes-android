@@ -19,7 +19,7 @@ import butterknife.OnClick;
 
 public class EditItemActivity extends AppCompatActivity {
     public final static int COLORS_COUNT = 9;
-    public static int COLOR_STEP = 360 / (COLORS_COUNT - 1);
+    public static int COLOR_STEP = 360 / COLORS_COUNT;
 
     @BindView(R.id.edit_app_bar_layout)
     AppBarLayout appBarLayout;
