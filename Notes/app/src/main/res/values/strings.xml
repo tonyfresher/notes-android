@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Notes</string>
+    <string name="edit_save">SAVE</string>
+    <string name="edit_delete">DELETE</string>
+    <string name="edit_change_color">Choose color</string>
+    <string name="edit_name">Name</string>
+    <string name="edit_description">Description</string>
+    <string name="note_saved">Note saved</string>
+    <string name="note_deleted">Note deleted</string>
+    <string name="preferences_file">com.tasks.notes.preferences</string>
+</resources>
