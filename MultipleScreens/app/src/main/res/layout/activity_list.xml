@@ -4,10 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.tasks.multiplescreens.ListActivity">
+    tools:context="com.tasks.notes.ListActivity">
 
     <ListView
-        android:id="@+id/items_list"
+        android:id="@+id/notes_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clipToPadding="false"

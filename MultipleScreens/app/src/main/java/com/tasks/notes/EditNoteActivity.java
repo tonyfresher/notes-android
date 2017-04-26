@@ -1,4 +1,4 @@
-package com.tasks.multiplescreens;
+package com.tasks.notes;
 
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -17,7 +17,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class EditItemActivity extends AppCompatActivity {
+public class EditNoteActivity extends AppCompatActivity {
     public final static int COLORS_COUNT = 9;
     public static int COLOR_STEP = 360 / COLORS_COUNT;
 
@@ -26,32 +26,32 @@ public class EditItemActivity extends AppCompatActivity {
     @BindView(R.id.edit_toolbar)
     Toolbar toolbar;
     @BindView(R.id.edit_name)
-    EditText itemName;
+    EditText noteName;
     @BindView(R.id.edit_description)
-    EditText itemDescription;
+    EditText noteDescription;
     @BindView(R.id.colors_layout)
     LinearLayout colorsLayout;
 
-    private boolean isNewItem = true;
-    private ItemContent item;
+    private boolean isNewNote = true;
+    private NoteContent note;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_edit_item);
+        setContentView(R.layout.activity_edit_note);
         ButterKnife.bind(this);
 
         setSupportActionBar(toolbar);
 
-        if (getIntent().hasExtra(ItemContent.NAME)) {
-            isNewItem = false;
+        if (getIntent().hasExtra(NoteContent.NAME)) {
+            isNewNote = false;
 
-            item = (ItemContent) getIntent().getSerializableExtra(ItemContent.NAME);
-            initFromItem();
+            note = (NoteContent) getIntent().getSerializableExtra(NoteContent.NAME);
+            initFromNote();
 
             findViewById(R.id.edit_delete).setVisibility(View.VISIBLE);
         } else {
-            item = new ItemContent();
+            note = new NoteContent();
         }
 
         final ImageView[] squares = new ImageView[COLORS_COUNT + 1];
@@ -70,7 +70,7 @@ public class EditItemActivity extends AppCompatActivity {
 
         for (ImageView s : squares) {
             int color = ((ColorDrawable) s.getBackground()).getColor();
-            if (color == item.color) {
+            if (color == note.color) {
                 s.setImageDrawable(getDrawable(R.drawable.frame_checked));
             }
         }
@@ -80,27 +80,25 @@ public class EditItemActivity extends AppCompatActivity {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        item.name = getName();
-        item.description = getDescription();
-        outState.putParcelable(ItemContent.NAME, item);
+        note.name = getName();
+        note.description = getDescription();
+        outState.putParcelable(NoteContent.NAME, note);
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-
-        item = savedInstanceState.getParcelable(ItemContent.NAME);
+        note = savedInstanceState.getParcelable(NoteContent.NAME);
     }
 
-    private void initFromItem() {
-        itemName.setText(item.name);
-        if (item.description != null)
-            itemDescription.setText(item.description);
-        if (item.color != 0)
-            appBarLayout.setBackgroundColor(item.color);
-        else {
-            appBarLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.colorPrimary));
-        }
+    private void initFromNote() {
+        noteName.setText(note.name);
+        
+        if (note.description != null)
+            noteDescription.setText(note.description);
+
+        appBarLayout.setBackgroundColor((note.color != 0) ?
+                note.color : ContextCompat.getColor(this, R.color.colorPrimary));
     }
 
     private ImageView makeColorSquare(final int color, final ImageView[] squares) {
@@ -114,14 +112,15 @@ public class EditItemActivity extends AppCompatActivity {
             public void onClick(View v) {
                 for (ImageView s : squares) {
                     int color = ((ColorDrawable) s.getBackground()).getColor();
-                    if (color == item.color) {
+                    if (color == note.color) {
                         s.setImageDrawable(getDrawable(R.drawable.frame));
                     }
                 }
 
                 ((ImageView) v).setImageDrawable(getDrawable(R.drawable.frame_checked));
-                item.color = color;
-                initFromItem();
+                note.color = color;
+                appBarLayout.setBackgroundColor((note.color != 0) ?
+                        note.color : ContextCompat.getColor(v.getContext(), R.color.colorPrimary));
             }
         });
 
@@ -144,41 +143,47 @@ public class EditItemActivity extends AppCompatActivity {
     @OnClick(R.id.edit_save)
     public void trySaveAndExit() {
         if (getName().equals("")) {
-            Toast.makeText(this, "Please enter item name", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please enter note name", Toast.LENGTH_SHORT).show();
             return;
         }
         saveItem();
         finish();
+
+        Toast.makeText(getApplicationContext(), getString(R.string.note_saved), Toast.LENGTH_SHORT)
+                .show();
     }
 
     @OnClick(R.id.edit_delete)
     public void deleteAndExit() {
         deleteItem();
         finish();
+
+        Toast.makeText(getApplicationContext(), getString(R.string.note_deleted), Toast.LENGTH_SHORT)
+                .show();
     }
 
     private void saveItem() {
-        item.name = getName();
-        item.description = getDescription();
+        note.name = getName();
+        note.description = getDescription();
 
         DatabaseHelper helper = new DatabaseHelper(this);
-        if (isNewItem) {
-            helper.insert(item);
+        if (isNewNote) {
+            helper.insert(note);
         } else {
-            helper.replace(item.id, item);
+            helper.replace(note.id, note);
         }
     }
 
     private void deleteItem() {
         DatabaseHelper helper = new DatabaseHelper(this);
-        helper.delete(item.id);
+        helper.delete(note.id);
     }
 
     private String getDescription() {
-        return itemDescription.getText().toString();
+        return noteDescription.getText().toString();
     }
 
     private String getName() {
-        return itemName.getText().toString();
+        return noteName.getText().toString();
     }
 }

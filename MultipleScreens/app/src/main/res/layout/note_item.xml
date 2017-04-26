@@ -19,13 +19,13 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/item_name"
+            android:id="@+id/note_name"
             style="@style/TextAppearance.AppCompat.Body2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
         <TextView
-            android:id="@+id/item_description"
+            android:id="@+id/note_description"
             style="@style/TextAppearance.AppCompat.Body1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
@@ -33,7 +33,7 @@
     </LinearLayout>
 
     <ImageView
-        android:id="@+id/item_color"
+        android:id="@+id/note_color"
         android:layout_width="10dp"
         android:layout_height="30dp"
         android:layout_alignParentRight="true"

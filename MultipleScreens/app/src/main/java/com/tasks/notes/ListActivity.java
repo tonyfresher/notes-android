@@ -1,4 +1,4 @@
-package com.tasks.multiplescreens;
+package com.tasks.notes;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -14,7 +14,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class ListActivity extends AppCompatActivity {
-    @BindView(R.id.items_list)
+    @BindView(R.id.notes_list)
     ListView list;
 
     @Override
@@ -26,10 +26,10 @@ public class ListActivity extends AppCompatActivity {
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                ItemContent item = (ItemContent) parent.getItemAtPosition(position);
+                NoteContent item = (NoteContent) parent.getItemAtPosition(position);
 
-                Intent intent = new Intent(view.getContext(), EditItemActivity.class);
-                intent.putExtra(ItemContent.NAME, (Serializable) item);
+                Intent intent = new Intent(view.getContext(), EditNoteActivity.class);
+                intent.putExtra(NoteContent.NAME, (Serializable) item);
                 startActivity(intent);
             }
         });
@@ -38,7 +38,7 @@ public class ListActivity extends AppCompatActivity {
         add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(view.getContext(), EditItemActivity.class);
+                Intent intent = new Intent(view.getContext(), EditNoteActivity.class);
                 startActivity(intent);
             }
         });
@@ -51,7 +51,7 @@ public class ListActivity extends AppCompatActivity {
         list.setAdapter(adapter);
     }
 
-    private ItemContent[] getDataSet() {
+    private NoteContent[] getDataSet() {
         DatabaseHelper helper = new DatabaseHelper(this);
         return helper.getAllItems();
     }

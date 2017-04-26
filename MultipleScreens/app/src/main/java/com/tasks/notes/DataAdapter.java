@@ -1,4 +1,4 @@
-package com.tasks.multiplescreens;
+package com.tasks.notes;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -10,15 +10,15 @@ import android.widget.TextView;
 
 public class DataAdapter extends BaseAdapter {
     private Context context;
-    private ItemContent[] data;
+    private NoteContent[] data;
 
-    public DataAdapter(Context context, ItemContent[] objects) {
+    public DataAdapter(Context context, NoteContent[] objects) {
         this.context = context;
         data = objects;
     }
 
     @Override
-    public ItemContent getItem(int i) {
+    public NoteContent getItem(int i) {
         return data[i];
     }
 
@@ -29,11 +29,11 @@ public class DataAdapter extends BaseAdapter {
         if (convertView == null){
             LayoutInflater inflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = inflater.inflate(R.layout.list_item, viewGroup, false);
+            convertView = inflater.inflate(R.layout.note_item, viewGroup, false);
             viewHolder = new ViewHolder();
-            viewHolder.name = (TextView) convertView.findViewById(R.id.item_name);
-            viewHolder.description = (TextView) convertView.findViewById(R.id.item_description);
-            viewHolder.color = (ImageView) convertView.findViewById(R.id.item_color);
+            viewHolder.name = (TextView) convertView.findViewById(R.id.note_name);
+            viewHolder.description = (TextView) convertView.findViewById(R.id.note_description);
+            viewHolder.color = (ImageView) convertView.findViewById(R.id.note_color);
             convertView.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) convertView.getTag();

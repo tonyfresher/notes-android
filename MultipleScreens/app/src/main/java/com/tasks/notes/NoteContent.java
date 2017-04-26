@@ -1,44 +1,44 @@
-package com.tasks.multiplescreens;
+package com.tasks.notes;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.io.Serializable;
 
-public class ItemContent implements Serializable, Parcelable {
-    public final static String NAME = "ItemContent";
+public class NoteContent implements Serializable, Parcelable {
+    public final static String NAME = "NoteContent";
 
-    public int id;
+    public long id;
     public String name;
     public String description;
     public int color;
 
-    public ItemContent() {
+    public NoteContent() {
     }
 
-    public ItemContent(int id, String name, String description, int color) {
+    public NoteContent(long id, String name, String description, int color) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.color = color;
     }
 
-    protected ItemContent(Parcel in) {
-        id = in.readInt();
+    protected NoteContent(Parcel in) {
+        id = in.readLong();
         name = in.readString();
         description = in.readString();
         color = in.readInt();
     }
 
-    public static final Creator<ItemContent> CREATOR = new Creator<ItemContent>() {
+    public static final Creator<NoteContent> CREATOR = new Creator<NoteContent>() {
         @Override
-        public ItemContent createFromParcel(Parcel in) {
-            return new ItemContent(in);
+        public NoteContent createFromParcel(Parcel in) {
+            return new NoteContent(in);
         }
 
         @Override
-        public ItemContent[] newArray(int size) {
-            return new ItemContent[size];
+        public NoteContent[] newArray(int size) {
+            return new NoteContent[size];
         }
     };
 
@@ -49,7 +49,7 @@ public class ItemContent implements Serializable, Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(id);
+        dest.writeLong(id);
         dest.writeString(name);
         dest.writeString(description);
         dest.writeInt(color);
