@@ -70,6 +70,7 @@ public class EditNoteActivity extends AppCompatActivity {
             findViewById(R.id.edit_delete).setVisibility(View.VISIBLE);
         } else {
             note = new NoteContent();
+            note.color = ContextCompat.getColor(this, R.color.colorPrimary);
         }
     }
 
@@ -171,7 +172,6 @@ public class EditNoteActivity extends AppCompatActivity {
     private void saveItem() {
         note.name = getName();
         note.description = getDescription();
-        note.color = ContextCompat.getColor(this, R.color.colorPrimary);
 
         DatabaseHelper helper = new DatabaseHelper(this);
         if (isNewNote) {
