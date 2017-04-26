@@ -69,7 +69,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public NoteContent[] getAllItems() {
-        ArrayList<NoteContent> notes = new ArrayList();
+        ArrayList<NoteContent> notes = new ArrayList<>();
 
         try (SQLiteDatabase db = this.getWritableDatabase()) {
             Cursor cursor = db.rawQuery(SELECT_ALL_QUERY, null);

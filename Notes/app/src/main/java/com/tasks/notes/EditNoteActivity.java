@@ -48,7 +48,8 @@ public class EditNoteActivity extends AppCompatActivity {
 
         int margin = (int) getResources().getDimension(R.dimen.margin);
 
-        ImageView emptySquare = makeColorSquare(0, colorSquares);
+        ImageView emptySquare = makeColorSquare(
+                ContextCompat.getColor(this, R.color.colorPrimary), colorSquares);
         addSquareToLayout(emptySquare, 0, 0, 0, 0);
         colorSquares[0] = emptySquare;
 
@@ -170,6 +171,7 @@ public class EditNoteActivity extends AppCompatActivity {
     private void saveItem() {
         note.name = getName();
         note.description = getDescription();
+        note.color = ContextCompat.getColor(this, R.color.colorPrimary);
 
         DatabaseHelper helper = new DatabaseHelper(this);
         if (isNewNote) {
