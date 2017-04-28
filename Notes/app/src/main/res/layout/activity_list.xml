@@ -6,19 +6,42 @@
     android:layout_height="match_parent"
     tools:context="com.tasks.notes.ListActivity">
 
-    <ListView
-        android:id="@+id/notes_list"
+    <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:clipToPadding="false"
-        android:layout_marginTop="8dp"
-        android:background="@android:color/background_light"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:background="@color/colorPrimary"
+        android:elevation="@dimen/design_appbar_elevation"
+        android:fitsSystemWindows="true"
+        android:stateListAnimator="@null"
+        android:theme="@style/AppTheme.AppBarOverlay">
 
-    </ListView>
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/list_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize"
+            android:fitsSystemWindows="true"
+            app:popupTheme="@style/AppTheme.PopupOverlay" />
+
+    </android.support.design.widget.AppBarLayout>
+
+    <ImageView
+        android:id="@+id/some"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:background="#ff0000" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/list_notes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="@color/colorBackground"
+        android:clipToPadding="false"
+        android:scrollbars="vertical"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/add_button"
+        android:id="@+id/list_add_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"

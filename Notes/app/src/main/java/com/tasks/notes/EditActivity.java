@@ -1,32 +1,36 @@
 package com.tasks.notes;
 
-import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.Toast;
+
+import java.util.Date;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class EditNoteActivity extends AppCompatActivity {
+public class EditActivity extends AppCompatActivity {
     public final static int COLORS_COUNT = 9;
     public static int COLOR_STEP = 360 / COLORS_COUNT;
 
     private final ImageView[] colorSquares = new ImageView[COLORS_COUNT + 1];
+    private final DatabaseHelper databaseHelper = new DatabaseHelper(this);
     private boolean isNewNote = true;
-    private NoteContent note;
+    private Note note;
 
+    @BindView(R.id.edit_scroll_view)
+    ScrollView scrollView;
     @BindView(R.id.edit_app_bar_layout)
     AppBarLayout appBarLayout;
     @BindView(R.id.edit_toolbar)
@@ -35,57 +39,55 @@ public class EditNoteActivity extends AppCompatActivity {
     EditText noteName;
     @BindView(R.id.edit_description)
     EditText noteDescription;
-    @BindView(R.id.colors_layout)
+    @BindView(R.id.edit_colors_layout)
     LinearLayout colorsLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_edit_note);
+        setContentView(R.layout.activity_edit);
         ButterKnife.bind(this);
 
         setSupportActionBar(toolbar);
 
         int margin = (int) getResources().getDimension(R.dimen.margin);
 
-        ImageView emptySquare = makeColorSquare(
-                ContextCompat.getColor(this, R.color.colorPrimary), colorSquares);
-        addSquareToLayout(emptySquare, 0, 0, 0, 0);
-        colorSquares[0] = emptySquare;
+        ImageView whiteSquare = makeColorSquare(Note.DEFAULT_COLOR, colorSquares);
+        addSquareToLayout(whiteSquare, 0, 0, 0, 0);
+        colorSquares[0] = whiteSquare;
 
         for (int i = 0; i < COLORS_COUNT; i++) {
-            int color = Color.HSVToColor(new float[]{COLOR_STEP * i, 1, 1});
+            int color = Color.HSVToColor(new float[]{COLOR_STEP * i, 0.15f, 1});
             ImageView square = makeColorSquare(color, colorSquares);
             addSquareToLayout(square, margin, 0, 0, 0);
             colorSquares[i + 1] = square;
         }
 
-        changeActivityColor(this, 0);
+        changeActivityColor(0);
 
-        if (getIntent().hasExtra(NoteContent.NAME)) {
+        if (getIntent().hasExtra(Note.NAME)) {
             isNewNote = false;
-            note = (NoteContent) getIntent().getSerializableExtra(NoteContent.NAME);
+            note = (Note) getIntent().getSerializableExtra(Note.NAME);
             initFromNote();
 
             findViewById(R.id.edit_delete).setVisibility(View.VISIBLE);
         } else {
-            note = new NoteContent();
-            note.color = ContextCompat.getColor(this, R.color.colorPrimary);
+            note = new Note();
         }
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelable(NoteContent.NAME, note);
+        outState.putParcelable(Note.NAME, note);
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        note = savedInstanceState.getParcelable(NoteContent.NAME);
+        note = savedInstanceState.getParcelable(Note.NAME);
 
-        changeActivityColor(this, note.color);
+        changeActivityColor(note.color);
     }
 
     private void initFromNote() {
@@ -94,17 +96,17 @@ public class EditNoteActivity extends AppCompatActivity {
         if (note.description != null)
             noteDescription.setText(note.description);
 
-        changeActivityColor(this, note.color);
+        changeActivityColor(note.color);
     }
 
-    private void changeActivityColor(Context context, int color) {
-        appBarLayout.setBackgroundColor((color != 0) ?
-                color : ContextCompat.getColor(context, R.color.colorPrimary));
+    private void changeActivityColor(int color) {
+        appBarLayout.setBackgroundColor(color);
+        scrollView.setBackgroundColor(color);
 
         for (ImageView square : colorSquares) {
             int squareColor = ((ColorDrawable) square.getBackground()).getColor();
             Drawable frame = (squareColor == color) ?
-                    getDrawable(R.drawable.frame_checked) : getDrawable(R.drawable.frame);
+                    getDrawable(R.drawable.frame_highlited) : getDrawable(R.drawable.frame);
             square.setImageDrawable(frame);
         }
     }
@@ -125,9 +127,9 @@ public class EditNoteActivity extends AppCompatActivity {
                     }
                 }
 
-                ((ImageView) v).setImageDrawable(getDrawable(R.drawable.frame_checked));
+                ((ImageView) v).setImageDrawable(getDrawable(R.drawable.frame_highlited));
                 note.color = color;
-                changeActivityColor(v.getContext(), color);
+                changeActivityColor(color);
             }
         });
 
@@ -144,16 +146,15 @@ public class EditNoteActivity extends AppCompatActivity {
 
     @OnClick(R.id.edit_exit)
     public void exit() {
+        if (!isNewNote)
+            databaseHelper.refreshViewedDate(note.id,
+                    Note.ISO8601_DATE_FORMAT.format(new Date()));
         finish();
     }
 
     @OnClick(R.id.edit_save)
     public void trySaveAndExit() {
-        if (getName().equals("")) {
-            Toast.makeText(this, "Please enter note name", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        saveItem();
+        saveNote();
         finish();
 
         Toast.makeText(getApplicationContext(), getString(R.string.note_saved), Toast.LENGTH_SHORT)
@@ -162,28 +163,30 @@ public class EditNoteActivity extends AppCompatActivity {
 
     @OnClick(R.id.edit_delete)
     public void deleteAndExit() {
-        deleteItem();
+        deleteNote();
         finish();
 
         Toast.makeText(getApplicationContext(), getString(R.string.note_deleted), Toast.LENGTH_SHORT)
                 .show();
     }
 
-    private void saveItem() {
+    private void saveNote() {
         note.name = getName();
         note.description = getDescription();
 
-        DatabaseHelper helper = new DatabaseHelper(this);
+        Date now = new Date();
+        note.edited = now;
+        note.viewed = now;
+
         if (isNewNote) {
-            helper.insert(note);
+            databaseHelper.insert(note);
         } else {
-            helper.replace(note.id, note);
+            databaseHelper.replace(note.id, note);
         }
     }
 
-    private void deleteItem() {
-        DatabaseHelper helper = new DatabaseHelper(this);
-        helper.delete(note.id);
+    private void deleteNote() {
+        databaseHelper.delete(note.id);
     }
 
     private String getDescription() {
