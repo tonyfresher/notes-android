@@ -31,11 +31,12 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class ListActivity extends AppCompatActivity {
-    private static final int MY_PERMISSIONS_REQUEST = 42;
+    private static final int MY_PERMISSIONS_REQUEST_READ = 101;
+    private static final int MY_PERMISSIONS_REQUEST_WRITE = 102;
     private static final int READ_REQUEST_CODE = 24;
     private final DatabaseHelper databaseHelper = new DatabaseHelper(this);
     private Comparator<Note> mDataComparator = Note.BY_CREATED_DESCENDING_COMPARATOR;
-    private boolean canWrite = false;
+    private String notesFile;
 
     @BindView(R.id.list_notes)
     RecyclerView notesList;
@@ -133,14 +134,11 @@ public class ListActivity extends AppCompatActivity {
                 startActivityForResult(exportIntent, READ_REQUEST_CODE);
                 return true;
             case R.id.menu_export:
-                String writePermission = Manifest.permission.WRITE_EXTERNAL_STORAGE;
-                if (!isPermissionAllowed(writePermission)) {
-                    requestPermission(writePermission);
-                    if (isPermissionAllowed(writePermission)) {
-                        ImportExportHelper.exportNotes(this, databaseHelper.getData(mDataComparator));
-                    } else {
-                        Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
-                    }
+                if (!isPermissionAllowed(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                    requestPermission(
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE, MY_PERMISSIONS_REQUEST_WRITE);
+                } else {
+                    ImportExportHelper.exportNotes(this, databaseHelper.getData(mDataComparator));
                 }
                 return true;
             default:
@@ -152,19 +150,44 @@ public class ListActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent resultData) {
         if (requestCode == READ_REQUEST_CODE && resultCode == Activity.RESULT_OK
                 && resultData != null) {
-            String readPermission = Manifest.permission.READ_EXTERNAL_STORAGE;
-            if (!isPermissionAllowed(readPermission)) {
-                requestPermission(readPermission);
-                if (isPermissionAllowed(readPermission)) {
-                    Uri uri = resultData.getData();
-                    Note[] notes = ImportExportHelper.importNotes(this, uri.getPath());
-                    for (Note note: notes) {
+            notesFile = resultData.getData().getPath();
+
+            if (!isPermissionAllowed(Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                requestPermission(
+                        Manifest.permission.READ_EXTERNAL_STORAGE, MY_PERMISSIONS_REQUEST_READ);
+            } else {
+                Note[] notes = ImportExportHelper.importNotes(this, notesFile);
+                for (Note note : notes) {
+                    databaseHelper.insert(note);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_WRITE: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    ImportExportHelper.exportNotes(this, databaseHelper.getData(mDataComparator));
+                } else {
+                    Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
+                }
+                return;
+            }
+            case MY_PERMISSIONS_REQUEST_READ:
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Note[] notes = ImportExportHelper.importNotes(this, notesFile);
+                    for (Note note : notes) {
                         databaseHelper.insert(note);
                     }
                 } else {
                     Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
                 }
-            }
+                return;
         }
     }
 
@@ -172,12 +195,12 @@ public class ListActivity extends AppCompatActivity {
         return ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED;
     }
 
-    private void requestPermission(String permission) {
+    private void requestPermission(String permission, int request) {
         if (!isPermissionAllowed(permission)) {
             ActivityCompat.requestPermissions(
                     this,
                     new String[]{permission},
-                    MY_PERMISSIONS_REQUEST);
+                    request);
         }
     }
 
