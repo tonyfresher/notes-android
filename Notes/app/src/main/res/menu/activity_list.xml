@@ -1,7 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item android:id="@+id/menu_sort"
+    <item
+        android:id="@+id/menu_search"
+        android:icon="@drawable/ic_search_white_24dp"
+        android:title="@string/search"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/menu_sort"
         android:title="@string/sort"
-        app:showAsAction="never"/>
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/menu_filter"
+        android:title="@string/filter"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/menu_import"
+        android:title="@string/importFile"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/menu_export"
+        android:title="@string/exportToFile"
+        app:showAsAction="never" />
 </menu>

@@ -12,32 +12,6 @@ import java.util.Date;
 public class Note implements Serializable, Parcelable {
     public final static String NAME = "Note";
     public final static int DEFAULT_COLOR = Color.parseColor("#ffffff");
-    public final static SimpleDateFormat ISO8601_DATE_FORMAT =
-            new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-    public final static Comparator<Note> BY_NAME_COMPARATOR = new Comparator<Note>() {
-        @Override
-        public int compare(Note o1, Note o2) {
-            return o1.getName().compareTo(o2.getName());
-        }
-    };
-    public final static Comparator<Note> BY_CREATED_COMPARATOR = new Comparator<Note>() {
-        @Override
-        public int compare(Note o1, Note o2) {
-            return o2.getCreated().compareTo(o1.getCreated());
-        }
-    };
-    public final static Comparator<Note> BY_EDITED_COMPARATOR = new Comparator<Note>() {
-        @Override
-        public int compare(Note o1, Note o2) {
-            return o2.getEdited().compareTo(o1.getEdited());
-        }
-    };
-    public final static Comparator<Note> BY_VIEWED_COMPARATOR = new Comparator<Note>() {
-        @Override
-        public int compare(Note o1, Note o2) {
-            return o2.getViewed().compareTo(o1.getViewed());
-        }
-    };
 
     private long id;
     private String name;
@@ -162,8 +136,37 @@ public class Note implements Serializable, Parcelable {
         return ISO8601_DATE_FORMAT.format(date);
     }
 
-    @Override
-    public String toString() {
-        return Long.toString(id) + "\n" + created + "\n" + edited + "\n" + viewed;
-    }
+    public final static SimpleDateFormat ISO8601_DATE_FORMAT =
+            new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+
+    public final static Comparator<Note> BY_NAME_COMPARATOR = new Comparator<Note>() {
+        @Override
+        public int compare(Note o1, Note o2) {
+            return o1.getName().compareTo(o2.getName());
+        }
+    };
+    public final static Comparator<Note> BY_NAME_DESCENDING_COMPARATOR = new Comparator<Note>() {
+        @Override
+        public int compare(Note o1, Note o2) {
+            return o2.getName().compareTo(o1.getName());
+        }
+    };
+    public final static Comparator<Note> BY_CREATED_COMPARATOR = new Comparator<Note>() {
+        @Override
+        public int compare(Note o1, Note o2) {
+            return o2.getCreated().compareTo(o1.getCreated());
+        }
+    };
+    public final static Comparator<Note> BY_EDITED_COMPARATOR = new Comparator<Note>() {
+        @Override
+        public int compare(Note o1, Note o2) {
+            return o2.getEdited().compareTo(o1.getEdited());
+        }
+    };
+    public final static Comparator<Note> BY_VIEWED_COMPARATOR = new Comparator<Note>() {
+        @Override
+        public int compare(Note o1, Note o2) {
+            return o2.getViewed().compareTo(o1.getViewed());
+        }
+    };
 }

@@ -19,8 +19,8 @@
             android:id="@+id/list_toolbar"
             android:layout_width="match_parent"
             android:layout_height="?actionBarSize"
-            app:layout_scrollFlags="scroll|enterAlways"
             android:fitsSystemWindows="true"
+            app:layout_scrollFlags="scroll|enterAlways"
             app:popupTheme="@style/AppTheme.PopupOverlay" />
 
     </android.support.design.widget.AppBarLayout>
@@ -28,10 +28,10 @@
     <android.support.v7.widget.RecyclerView
         android:id="@+id/list_notes"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="8dp"
+        android:layout_height="match_parent"
         android:background="@color/colorBackground"
         android:clipToPadding="false"
+        android:paddingTop="8dp"
         android:scrollbars="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
@@ -43,6 +43,19 @@
         android:layout_margin="@dimen/margin"
         app:srcCompat="@drawable/ic_add_white_24dp" />
 
-    <include layout="@layout/bottom_sheet_sort" />
+    <com.flipboard.bottomsheet.BottomSheetLayout
+        android:id="@+id/bottom_sheet_sort"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+        </LinearLayout>
+
+    </com.flipboard.bottomsheet.BottomSheetLayout>
 
 </android.support.design.widget.CoordinatorLayout>

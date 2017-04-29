@@ -74,8 +74,6 @@ public class EditActivity extends AppCompatActivity {
         }
 
         initFromNote();
-
-        Toast.makeText(this, note.toString(), Toast.LENGTH_LONG).show();
     }
 
     @Override
