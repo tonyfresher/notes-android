@@ -19,33 +19,30 @@
             android:id="@+id/list_toolbar"
             android:layout_width="match_parent"
             android:layout_height="?actionBarSize"
+            app:layout_scrollFlags="scroll|enterAlways"
             android:fitsSystemWindows="true"
             app:popupTheme="@style/AppTheme.PopupOverlay" />
 
     </android.support.design.widget.AppBarLayout>
 
-    <ImageView
-        android:id="@+id/some"
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:background="#ff0000" />
-
     <android.support.v7.widget.RecyclerView
         android:id="@+id/list_notes"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:paddingTop="8dp"
         android:background="@color/colorBackground"
         android:clipToPadding="false"
         android:scrollbars="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/list_add_button"
+        android:id="@+id/list_floating_add_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/margin"
         app:srcCompat="@drawable/ic_add_white_24dp" />
+
+    <include layout="@layout/bottom_sheet_sort" />
 
 </android.support.design.widget.CoordinatorLayout>

@@ -31,12 +31,12 @@ public class ContentAdapter extends RecyclerView.Adapter<ContentAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.mName.setText(mData[position].name);
-        holder.mDescription.setText(mData[position].description);
-        holder.mContainer.setBackgroundColor(mData[position].color);
-        holder.mName.setVisibility((mData[position].name.equals("")) ?
+        holder.mName.setText(mData[position].getName());
+        holder.mDescription.setText(mData[position].getDescription());
+        holder.mContainer.setBackgroundColor(mData[position].getColor());
+        holder.mName.setVisibility("".equals(mData[position].getName()) ?
                 View.GONE : View.VISIBLE);
-        holder.mDescription.setVisibility((mData[position].description.equals("")) ?
+        holder.mDescription.setVisibility("".equals(mData[position].getDescription()) ?
                 View.GONE : View.VISIBLE);
     }
 

@@ -20,7 +20,6 @@
             android:id="@+id/edit_app_bar_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="?attr/colorPrimary"
             android:elevation="@dimen/design_appbar_elevation"
             android:fitsSystemWindows="true"
             android:stateListAnimator="@null"
@@ -31,6 +30,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="?actionBarSize"
                 android:fitsSystemWindows="true"
+                app:layout_scrollFlags="scroll|enterAlways"
                 app:popupTheme="@style/AppTheme.PopupOverlay">
 
                 <RelativeLayout
@@ -95,8 +95,8 @@
             android:id="@+id/edit_colors"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
             android:layout_gravity="bottom"
+            android:layout_margin="16dp"
             android:overScrollMode="never"
             android:scrollbars="none">
 

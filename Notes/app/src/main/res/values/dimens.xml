@@ -1,5 +1,5 @@
 <resources>
-    <dimen name="edit_app_bar_height">112dp</dimen>
+    <dimen name="sort_box_height">25dp</dimen>
     <dimen name="color_square_size">36dp</dimen>
     <dimen name="margin">16dp</dimen>
 </resources>

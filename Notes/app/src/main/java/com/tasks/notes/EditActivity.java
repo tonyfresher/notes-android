@@ -68,12 +68,14 @@ public class EditActivity extends AppCompatActivity {
         if (getIntent().hasExtra(Note.NAME)) {
             isNewNote = false;
             note = (Note) getIntent().getSerializableExtra(Note.NAME);
-            initFromNote();
-
             findViewById(R.id.edit_delete).setVisibility(View.VISIBLE);
         } else {
             note = new Note();
         }
+
+        initFromNote();
+
+        Toast.makeText(this, note.toString(), Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -87,16 +89,22 @@ public class EditActivity extends AppCompatActivity {
         super.onRestoreInstanceState(savedInstanceState);
         note = savedInstanceState.getParcelable(Note.NAME);
 
-        changeActivityColor(note.color);
+        changeActivityColor(note.getColor());
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        exit();
     }
 
     private void initFromNote() {
-        noteName.setText(note.name);
+        noteName.setText(note.getName());
 
-        if (note.description != null)
-            noteDescription.setText(note.description);
+        if (note.getDescription() != null)
+            noteDescription.setText(note.getDescription());
 
-        changeActivityColor(note.color);
+        changeActivityColor(note.getColor());
     }
 
     private void changeActivityColor(int color) {
@@ -122,13 +130,13 @@ public class EditActivity extends AppCompatActivity {
             public void onClick(View v) {
                 for (ImageView s : squares) {
                     int color = ((ColorDrawable) s.getBackground()).getColor();
-                    if (color == note.color) {
+                    if (color == note.getColor()) {
                         s.setImageDrawable(getDrawable(R.drawable.frame));
                     }
                 }
 
                 ((ImageView) v).setImageDrawable(getDrawable(R.drawable.frame_highlited));
-                note.color = color;
+                note.setColor(color);
                 changeActivityColor(color);
             }
         });
@@ -145,15 +153,15 @@ public class EditActivity extends AppCompatActivity {
     }
 
     @OnClick(R.id.edit_exit)
-    public void exit() {
+    protected void exit() {
         if (!isNewNote)
-            databaseHelper.refreshViewedDate(note.id,
-                    Note.ISO8601_DATE_FORMAT.format(new Date()));
+            databaseHelper.refreshViewedDate(note.getId(),
+                    getNowString());
         finish();
     }
 
     @OnClick(R.id.edit_save)
-    public void trySaveAndExit() {
+    protected void trySaveAndExit() {
         saveNote();
         finish();
 
@@ -162,7 +170,7 @@ public class EditActivity extends AppCompatActivity {
     }
 
     @OnClick(R.id.edit_delete)
-    public void deleteAndExit() {
+    protected void deleteAndExit() {
         deleteNote();
         finish();
 
@@ -171,29 +179,33 @@ public class EditActivity extends AppCompatActivity {
     }
 
     private void saveNote() {
-        note.name = getName();
-        note.description = getDescription();
+        note.setName(getNameFromEditText());
+        note.setDescription(getDescriptionFromEditText());
 
-        Date now = new Date();
-        note.edited = now;
-        note.viewed = now;
+        String now = getNowString();
+        note.setEdited(now);
+        note.setViewed(now);
 
         if (isNewNote) {
             databaseHelper.insert(note);
         } else {
-            databaseHelper.replace(note.id, note);
+            databaseHelper.replace(note.getId(), note);
         }
     }
 
     private void deleteNote() {
-        databaseHelper.delete(note.id);
+        databaseHelper.delete(note.getId());
     }
 
-    private String getDescription() {
+    private String getDescriptionFromEditText() {
         return noteDescription.getText().toString();
     }
 
-    private String getName() {
+    private String getNameFromEditText() {
         return noteName.getText().toString();
+    }
+
+    private static String getNowString() {
+        return Note.ISO8601_DATE_FORMAT.format(new Date());
     }
 }

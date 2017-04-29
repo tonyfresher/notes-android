@@ -7,5 +7,10 @@
     <string name="edit_description">Description</string>
     <string name="note_saved">Note saved</string>
     <string name="note_deleted">Note deleted</string>
+    <string name="sort">Sort</string>
+    <string name="by_name">By name</string>
+    <string name="by_created">By created time</string>
+    <string name="by_edited">By edited time</string>
+    <string name="by_viewed">By viewed time</string>
     <string name="preferences_file">com.tasks.notes.preferences</string>
 </resources>

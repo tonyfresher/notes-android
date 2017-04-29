@@ -102,20 +102,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public void refreshViewedDate(long row, String visited) {
         try (SQLiteDatabase db = this.getWritableDatabase()) {
-            db.execSQL(
-                    "UPDATE ? SET ?=? WHERE ?=?",
-                    new String[]{TABLE_NAME, NOTE_VIEWED, visited, NOTE_ROWID, Long.toString(row)});
+            db.execSQL(String.format(
+                    "UPDATE %s SET %s=? WHERE %s=?", TABLE_NAME, NOTE_VIEWED, NOTE_ROWID),
+                    new String[]{visited, Long.toString(row)});
         }
     }
 
     private ContentValues getContentValuesFromNote(Note note) {
         ContentValues values = new ContentValues();
-        values.put(NOTE_NAME, note.name);
-        values.put(NOTE_DESCRIPTION, note.description);
-        values.put(NOTE_COLOR, note.color);
-        values.put(NOTE_CREATED, Note.ISO8601_DATE_FORMAT.format(note.created));
-        values.put(NOTE_EDITED, Note.ISO8601_DATE_FORMAT.format(note.edited));
-        values.put(NOTE_VIEWED, Note.ISO8601_DATE_FORMAT.format(note.viewed));
+        values.put(NOTE_NAME, note.getName());
+        values.put(NOTE_DESCRIPTION, note.getDescription());
+        values.put(NOTE_COLOR, note.getColor());
+        values.put(NOTE_CREATED, note.getCreated());
+        values.put(NOTE_EDITED, note.getEdited());
+        values.put(NOTE_VIEWED, note.getViewed());
         return values;
     }
 }
