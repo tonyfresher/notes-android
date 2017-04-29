@@ -2,14 +2,12 @@ package com.tasks.notes;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -17,15 +15,18 @@ import android.view.View;
 
 import com.flipboard.bottomsheet.BottomSheetLayout;
 import com.flipboard.bottomsheet.commons.MenuSheetView;
+import com.tasks.notes.helpers.DatabaseHelper;
+import com.tasks.notes.helpers.ImportExportHelper;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Comparator;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class ListActivity extends AppCompatActivity {
+    private final DatabaseHelper databaseHelper = new DatabaseHelper(this);
+
     @BindView(R.id.list_notes)
     RecyclerView notesList;
     @BindView(R.id.list_floating_add_button)
@@ -35,7 +36,7 @@ public class ListActivity extends AppCompatActivity {
 
     MenuSheetView menuSheetView;
 
-    private Comparator<Note> mDataComparator = Note.BY_CREATED_COMPARATOR;
+    private Comparator<Note> mDataComparator = Note.BY_CREATED_DESCENDING_COMPARATOR;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,16 +58,18 @@ public class ListActivity extends AppCompatActivity {
                         mDataComparator = Note.BY_NAME_COMPARATOR;
                         break;
                     case R.id.bottom_sheet_sort_by_created:
-                        mDataComparator = Note.BY_CREATED_COMPARATOR;
+                        mDataComparator = Note.BY_CREATED_DESCENDING_COMPARATOR;
                         break;
                     case R.id.bottom_sheet_sort_by_edited:
-                        mDataComparator = Note.BY_EDITED_COMPARATOR;
+                        mDataComparator = Note.BY_EDITED_DESCENDING_COMPARATOR;
                         break;
                     case R.id.bottom_sheet_sort_by_viewed:
-                        mDataComparator = Note.BY_VIEWED_COMPARATOR;
+                        mDataComparator = Note.BY_VIEWED_DESCENDING_COMPARATOR;
                         break;
                 }
-                bottomSheet.dismissSheet();
+                if (bottomSheet.isSheetShowing()) {
+                    bottomSheet.dismissSheet();
+                }
                 onResume();
                 showFloatingButton(300);
                 return true;
@@ -86,7 +89,7 @@ public class ListActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        final Note[] data = getData(mDataComparator);
+        final Note[] data = databaseHelper.getData(mDataComparator);
         ContentAdapter adapter = new ContentAdapter(data, new ContentAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View v, int position) {
@@ -95,6 +98,7 @@ public class ListActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
         notesList.setAdapter(adapter);
     }
 
@@ -108,21 +112,21 @@ public class ListActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.menu_search:
+                return true;
             case R.id.menu_sort:
                 hideFloatingButton(150);
                 bottomSheet.showWithSheetView(menuSheetView);
                 return true;
+            case R.id.menu_filter:
+                return true;
+            case R.id.menu_import:
+                return true;
+            case R.id.menu_export:
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }
-
-    private Note[] getData(@NonNull Comparator<Note> comparator) {
-        DatabaseHelper helper = new DatabaseHelper(this);
-        Note[] data = helper.getAllItems();
-
-        Arrays.sort(data, comparator);
-        return data;
     }
 
     private void showFloatingButton(int duration) {

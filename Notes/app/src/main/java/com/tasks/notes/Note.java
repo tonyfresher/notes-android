@@ -14,7 +14,7 @@ public class Note implements Serializable, Parcelable {
     public final static int DEFAULT_COLOR = Color.parseColor("#ffffff");
 
     private long id;
-    private String name;
+    private String title;
     private String description;
     private int color;
 
@@ -24,16 +24,16 @@ public class Note implements Serializable, Parcelable {
 
     public Note() {
         color = DEFAULT_COLOR;
-        String now = ISO8601_DATE_FORMAT.format(new Date());
+        String now = dateToIsoString(new Date());
         created = now;
         edited = now;
         viewed = now;
     }
 
-    public Note(long id, String name, String description, int color,
+    public Note(long id, String title, String description, int color,
                 String created, String edited, String viewed) {
         this.id = id;
-        this.name = name;
+        this.title = title;
         this.description = description;
         this.color = color;
         this.created = created;
@@ -43,7 +43,7 @@ public class Note implements Serializable, Parcelable {
 
     protected Note(Parcel in) {
         id = in.readLong();
-        name = in.readString();
+        title = in.readString();
         description = in.readString();
         color = in.readInt();
         created = in.readString();
@@ -72,7 +72,7 @@ public class Note implements Serializable, Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(id);
-        dest.writeString(name);
+        dest.writeString(title);
         dest.writeString(description);
         dest.writeInt(color);
         dest.writeString(created);
@@ -84,12 +84,12 @@ public class Note implements Serializable, Parcelable {
         return id;
     }
 
-    public String getName() {
-        return name;
+    public String getTitle() {
+        return title;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getDescription() {
@@ -142,28 +142,28 @@ public class Note implements Serializable, Parcelable {
     public final static Comparator<Note> BY_NAME_COMPARATOR = new Comparator<Note>() {
         @Override
         public int compare(Note o1, Note o2) {
-            return o1.getName().compareTo(o2.getName());
+            return o1.getTitle().compareTo(o2.getTitle());
         }
     };
     public final static Comparator<Note> BY_NAME_DESCENDING_COMPARATOR = new Comparator<Note>() {
         @Override
         public int compare(Note o1, Note o2) {
-            return o2.getName().compareTo(o1.getName());
+            return o2.getTitle().compareTo(o1.getTitle());
         }
     };
-    public final static Comparator<Note> BY_CREATED_COMPARATOR = new Comparator<Note>() {
+    public final static Comparator<Note> BY_CREATED_DESCENDING_COMPARATOR = new Comparator<Note>() {
         @Override
         public int compare(Note o1, Note o2) {
             return o2.getCreated().compareTo(o1.getCreated());
         }
     };
-    public final static Comparator<Note> BY_EDITED_COMPARATOR = new Comparator<Note>() {
+    public final static Comparator<Note> BY_EDITED_DESCENDING_COMPARATOR = new Comparator<Note>() {
         @Override
         public int compare(Note o1, Note o2) {
             return o2.getEdited().compareTo(o1.getEdited());
         }
     };
-    public final static Comparator<Note> BY_VIEWED_COMPARATOR = new Comparator<Note>() {
+    public final static Comparator<Note> BY_VIEWED_DESCENDING_COMPARATOR = new Comparator<Note>() {
         @Override
         public int compare(Note o1, Note o2) {
             return o2.getViewed().compareTo(o1.getViewed());

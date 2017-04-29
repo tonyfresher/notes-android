@@ -31,10 +31,10 @@ public class ContentAdapter extends RecyclerView.Adapter<ContentAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.mName.setText(mData[position].getName());
+        holder.mTitle.setText(mData[position].getTitle());
         holder.mDescription.setText(mData[position].getDescription());
         holder.mContainer.setBackgroundColor(mData[position].getColor());
-        holder.mName.setVisibility("".equals(mData[position].getName()) ?
+        holder.mTitle.setVisibility("".equals(mData[position].getTitle()) ?
                 View.GONE : View.VISIBLE);
         holder.mDescription.setVisibility("".equals(mData[position].getDescription()) ?
                 View.GONE : View.VISIBLE);
@@ -46,13 +46,13 @@ public class ContentAdapter extends RecyclerView.Adapter<ContentAdapter.ViewHold
     }
 
     protected static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        TextView mName;
+        TextView mTitle;
         TextView mDescription;
         RelativeLayout mContainer;
 
         public ViewHolder(View viewItem) {
             super(viewItem);
-            mName = (TextView) viewItem.findViewById(R.id.list_item_name);
+            mTitle = (TextView) viewItem.findViewById(R.id.list_item_title);
             mDescription = (TextView) viewItem.findViewById(R.id.list_item_description);
             mContainer = (RelativeLayout) viewItem.findViewById(R.id.list_item_container);
 

@@ -70,7 +70,7 @@
         </android.support.design.widget.AppBarLayout>
 
         <EditText
-            android:id="@+id/edit_name"
+            android:id="@+id/edit_title"
             style="@style/FullWidthEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

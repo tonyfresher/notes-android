@@ -14,6 +14,8 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.Toast;
 
+import com.tasks.notes.helpers.DatabaseHelper;
+
 import java.util.Date;
 
 import butterknife.BindView;
@@ -35,8 +37,8 @@ public class EditActivity extends AppCompatActivity {
     AppBarLayout appBarLayout;
     @BindView(R.id.edit_toolbar)
     Toolbar toolbar;
-    @BindView(R.id.edit_name)
-    EditText noteName;
+    @BindView(R.id.edit_title)
+    EditText noteTitle;
     @BindView(R.id.edit_description)
     EditText noteDescription;
     @BindView(R.id.edit_colors_layout)
@@ -97,7 +99,7 @@ public class EditActivity extends AppCompatActivity {
     }
 
     private void initFromNote() {
-        noteName.setText(note.getName());
+        noteTitle.setText(note.getTitle());
 
         if (note.getDescription() != null)
             noteDescription.setText(note.getDescription());
@@ -177,7 +179,7 @@ public class EditActivity extends AppCompatActivity {
     }
 
     private void saveNote() {
-        note.setName(getNameFromEditText());
+        note.setTitle(getTitleFromEditText());
         note.setDescription(getDescriptionFromEditText());
 
         String now = getNowString();
@@ -199,11 +201,11 @@ public class EditActivity extends AppCompatActivity {
         return noteDescription.getText().toString();
     }
 
-    private String getNameFromEditText() {
-        return noteName.getText().toString();
+    private String getTitleFromEditText() {
+        return noteTitle.getText().toString();
     }
 
     private static String getNowString() {
-        return Note.ISO8601_DATE_FORMAT.format(new Date());
+        return Note.dateToIsoString(new Date());
     }
 }
