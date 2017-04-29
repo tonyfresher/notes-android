@@ -1,17 +1,23 @@
 package com.tasks.notes;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.flipboard.bottomsheet.BottomSheetLayout;
 import com.flipboard.bottomsheet.commons.MenuSheetView;
@@ -25,7 +31,11 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class ListActivity extends AppCompatActivity {
+    private static final int MY_PERMISSIONS_REQUEST = 42;
+    private static final int READ_REQUEST_CODE = 24;
     private final DatabaseHelper databaseHelper = new DatabaseHelper(this);
+    private Comparator<Note> mDataComparator = Note.BY_CREATED_DESCENDING_COMPARATOR;
+    private boolean canWrite = false;
 
     @BindView(R.id.list_notes)
     RecyclerView notesList;
@@ -33,10 +43,7 @@ public class ListActivity extends AppCompatActivity {
     FloatingActionButton floatingAddButton;
     @BindView(R.id.bottom_sheet_sort)
     BottomSheetLayout bottomSheet;
-
     MenuSheetView menuSheetView;
-
-    private Comparator<Note> mDataComparator = Note.BY_CREATED_DESCENDING_COMPARATOR;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,7 +105,6 @@ public class ListActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-
         notesList.setAdapter(adapter);
     }
 
@@ -121,11 +127,57 @@ public class ListActivity extends AppCompatActivity {
             case R.id.menu_filter:
                 return true;
             case R.id.menu_import:
+                Intent exportIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                exportIntent.addCategory(Intent.CATEGORY_OPENABLE);
+                exportIntent.setType("application/json");
+                startActivityForResult(exportIntent, READ_REQUEST_CODE);
                 return true;
             case R.id.menu_export:
+                String writePermission = Manifest.permission.WRITE_EXTERNAL_STORAGE;
+                if (!isPermissionAllowed(writePermission)) {
+                    requestPermission(writePermission);
+                    if (isPermissionAllowed(writePermission)) {
+                        ImportExportHelper.exportNotes(this, databaseHelper.getData(mDataComparator));
+                    } else {
+                        Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
+                    }
+                }
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent resultData) {
+        if (requestCode == READ_REQUEST_CODE && resultCode == Activity.RESULT_OK
+                && resultData != null) {
+            String readPermission = Manifest.permission.READ_EXTERNAL_STORAGE;
+            if (!isPermissionAllowed(readPermission)) {
+                requestPermission(readPermission);
+                if (isPermissionAllowed(readPermission)) {
+                    Uri uri = resultData.getData();
+                    Note[] notes = ImportExportHelper.importNotes(this, uri.getPath());
+                    for (Note note: notes) {
+                        databaseHelper.insert(note);
+                    }
+                } else {
+                    Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    }
+
+    private boolean isPermissionAllowed(String permission) {
+        return ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void requestPermission(String permission) {
+        if (!isPermissionAllowed(permission)) {
+            ActivityCompat.requestPermissions(
+                    this,
+                    new String[]{permission},
+                    MY_PERMISSIONS_REQUEST);
         }
     }
 

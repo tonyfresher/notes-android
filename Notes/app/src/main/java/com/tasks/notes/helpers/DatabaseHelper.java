@@ -48,6 +48,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
+    public void dropTable() {
+        try (SQLiteDatabase db = this.getWritableDatabase()) {
+            db.execSQL(DROP_TABLE_QUERY);
+            db.execSQL(CREATE_TABLE_QUERY);
+        }
+    }
+
     public void insert(Note note) {
         ContentValues values = getContentValuesFromNote(note);
 

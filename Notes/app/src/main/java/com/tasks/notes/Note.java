@@ -132,6 +132,7 @@ public class Note implements Serializable, Parcelable {
         this.viewed = viewed;
     }
 
+
     public static String dateToIsoString(Date date) {
         return ISO8601_DATE_FORMAT.format(date);
     }
