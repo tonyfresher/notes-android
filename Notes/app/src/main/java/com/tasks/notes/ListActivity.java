@@ -2,10 +2,13 @@ package com.tasks.notes;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -13,6 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -24,19 +28,24 @@ import com.flipboard.bottomsheet.commons.MenuSheetView;
 import com.tasks.notes.helpers.DatabaseHelper;
 import com.tasks.notes.helpers.ImportExportHelper;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.net.URISyntaxException;
 import java.util.Comparator;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class ListActivity extends AppCompatActivity {
-    private static final int MY_PERMISSIONS_REQUEST_READ = 101;
-    private static final int MY_PERMISSIONS_REQUEST_WRITE = 102;
-    private static final int READ_REQUEST_CODE = 24;
+    private static final String IMPORT_TAG = "IMPORT";
+    private static final String EXPORT_TAG = "EXPORT";
+
+    private static final int REQUEST_PERMISSION_READ = 101;
+    private static final int REQUEST_PERMISSION_WRITE = 102;
+    private static final int REQUEST_FILE_TO_READ = 24;
+
     private final DatabaseHelper databaseHelper = new DatabaseHelper(this);
     private Comparator<Note> mDataComparator = Note.BY_CREATED_DESCENDING_COMPARATOR;
-    private String notesFile;
 
     @BindView(R.id.list_notes)
     RecyclerView notesList;
@@ -128,18 +137,10 @@ public class ListActivity extends AppCompatActivity {
             case R.id.menu_filter:
                 return true;
             case R.id.menu_import:
-                Intent exportIntent = new Intent(Intent.ACTION_GET_CONTENT);
-                exportIntent.addCategory(Intent.CATEGORY_OPENABLE);
-                exportIntent.setType("application/json");
-                startActivityForResult(exportIntent, READ_REQUEST_CODE);
+                requestImportFile();
                 return true;
             case R.id.menu_export:
-                if (!isPermissionAllowed(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                    requestPermission(
-                            Manifest.permission.WRITE_EXTERNAL_STORAGE, MY_PERMISSIONS_REQUEST_WRITE);
-                } else {
-                    ImportExportHelper.exportNotes(this, databaseHelper.getData(mDataComparator));
-                }
+                tryExport();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -148,19 +149,42 @@ public class ListActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent resultData) {
-        if (requestCode == READ_REQUEST_CODE && resultCode == Activity.RESULT_OK
+        if (requestCode == REQUEST_FILE_TO_READ && resultCode == Activity.RESULT_OK
                 && resultData != null) {
-            notesFile = resultData.getData().getPath();
+            tryImport(resultData.getData());
+        }
+    }
 
-            if (!isPermissionAllowed(Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                requestPermission(
-                        Manifest.permission.READ_EXTERNAL_STORAGE, MY_PERMISSIONS_REQUEST_READ);
-            } else {
-                Note[] notes = ImportExportHelper.importNotes(this, notesFile);
-                for (Note note : notes) {
-                    databaseHelper.insert(note);
-                }
+    private void tryImport(Uri uri) {
+        if (isPermissionAllowed(Manifest.permission.READ_EXTERNAL_STORAGE)) {
+            try {
+                ImportExportHelper.importNotes(this, uri);
+                showToast(getString(R.string.successfully_imported), Toast.LENGTH_SHORT);
+            } catch (IllegalAccessException e) {
+                showToast(getString(R.string.cant_read), Toast.LENGTH_SHORT);
+            } catch (IOException e) {
+                showToast(getString(R.string.wrong_file), Toast.LENGTH_SHORT);
             }
+        } else {
+            requestPermission(
+                    Manifest.permission.READ_EXTERNAL_STORAGE, REQUEST_PERMISSION_READ);
+        }
+    }
+
+    private void tryExport() {
+        if (isPermissionAllowed(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            try {
+                String file =
+                        ImportExportHelper.exportNotes(databaseHelper.getData(mDataComparator));
+                showToast(getString(R.string.successfully_exported_to) + file, Toast.LENGTH_SHORT);
+            } catch (IllegalAccessException e) {
+                showToast(getString(R.string.cant_write), Toast.LENGTH_SHORT);
+            } catch (IOException e) {
+                showToast(getString(R.string.wrong_file), Toast.LENGTH_SHORT);
+            }
+        } else {
+            requestPermission(
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE, REQUEST_PERMISSION_WRITE);
         }
     }
 
@@ -168,27 +192,31 @@ public class ListActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {
         switch (requestCode) {
-            case MY_PERMISSIONS_REQUEST_WRITE: {
+            case REQUEST_PERMISSION_READ:
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    ImportExportHelper.exportNotes(this, databaseHelper.getData(mDataComparator));
+                    requestImportFile();
                 } else {
-                    Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
+                    showToast(getString(R.string.cant_read), Toast.LENGTH_SHORT);
+                }
+                return;
+            case REQUEST_PERMISSION_WRITE: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    tryExport();
+                } else {
+                    showToast(getString(R.string.cant_write), Toast.LENGTH_SHORT);
                 }
                 return;
             }
-            case MY_PERMISSIONS_REQUEST_READ:
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Note[] notes = ImportExportHelper.importNotes(this, notesFile);
-                    for (Note note : notes) {
-                        databaseHelper.insert(note);
-                    }
-                } else {
-                    Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
-                }
-                return;
         }
+    }
+
+    private void requestImportFile() {
+        Intent exportIntent = new Intent(Intent.ACTION_GET_CONTENT);
+        exportIntent.addCategory(Intent.CATEGORY_OPENABLE);
+        exportIntent.setType("*/*");
+        startActivityForResult(exportIntent, REQUEST_FILE_TO_READ);
     }
 
     private boolean isPermissionAllowed(String permission) {
@@ -196,12 +224,7 @@ public class ListActivity extends AppCompatActivity {
     }
 
     private void requestPermission(String permission, int request) {
-        if (!isPermissionAllowed(permission)) {
-            ActivityCompat.requestPermissions(
-                    this,
-                    new String[]{permission},
-                    request);
-        }
+        ActivityCompat.requestPermissions(this, new String[]{permission}, request);
     }
 
     private void showFloatingButton(int duration) {
@@ -210,5 +233,9 @@ public class ListActivity extends AppCompatActivity {
 
     private void hideFloatingButton(int duration) {
         floatingAddButton.animate().scaleX(0).scaleY(0).setDuration(duration).start();
+    }
+
+    private void showToast(String message, int length) {
+        Toast.makeText(this, message, length).show();
     }
 }

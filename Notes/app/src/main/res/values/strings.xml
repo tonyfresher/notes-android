@@ -19,5 +19,11 @@
     <string name="by_edited">By edited time</string>
     <string name="by_viewed">By viewed time</string>
 
+    <string name="cant_write">Can\'t write: permission denied</string>
+    <string name="cant_read">Can\'t read: permission denied</string>
+    <string name="wrong_file">Wrong file</string>
+    <string name="successfully_imported">Notes are successfully imported</string>
+    <string name="successfully_exported_to">Notes are successfully exported to</string>
+
     <string name="preferences_file">com.tasks.notes.preferences</string>
 </resources>
