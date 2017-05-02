@@ -25,6 +25,7 @@ import android.widget.Toast;
 
 import com.flipboard.bottomsheet.BottomSheetLayout;
 import com.flipboard.bottomsheet.commons.MenuSheetView;
+import com.google.gson.JsonParseException;
 import com.tasks.notes.helpers.DatabaseHelper;
 import com.tasks.notes.helpers.ImportExportHelper;
 
@@ -162,7 +163,7 @@ public class ListActivity extends AppCompatActivity {
                 showToast(getString(R.string.successfully_imported), Toast.LENGTH_SHORT);
             } catch (IllegalAccessException e) {
                 showToast(getString(R.string.cant_read), Toast.LENGTH_SHORT);
-            } catch (IOException e) {
+            } catch (IOException | JsonParseException e) {
                 showToast(getString(R.string.wrong_file), Toast.LENGTH_SHORT);
             }
         } else {

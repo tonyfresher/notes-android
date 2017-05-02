@@ -37,8 +37,9 @@ public class ImportExportHelper {
             .create();
     public final static String FILE_NAME = "itemlist.ili";
 
+
     public static void importNotes(Context context, @NonNull Uri uri)
-            throws IllegalAccessException, IOException {
+            throws IllegalAccessException, IOException, JsonParseException {
         if (!isExternalStorageReadable()) {
             throw new IllegalAccessException();
         }
@@ -74,7 +75,6 @@ public class ImportExportHelper {
         return file.getCanonicalPath();
     }
 
-
     public static boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
         if (Environment.MEDIA_MOUNTED.equals(state)) {
@@ -108,8 +108,12 @@ public class ImportExportHelper {
         return gsonSerializer.toJson(notes);
     }
 
-    public static Note[] jsonToNotes(String json) {
-        return gsonSerializer.fromJson(json, Note[].class);
+    public static Note[] jsonToNotes(String json)
+            throws JsonParseException {
+        Note[] notes = gsonSerializer.fromJson(json, Note[].class);
+        if (notes == null)
+            throw new JsonParseException("Wrong format");
+        return notes;
     }
 
     public static class NoteSerializer implements JsonSerializer<Note>, JsonDeserializer<Note> {
