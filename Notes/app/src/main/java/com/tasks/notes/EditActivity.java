@@ -26,10 +26,10 @@ public class EditActivity extends AppCompatActivity {
     public final static int COLORS_COUNT = 9;
     public static int COLOR_STEP = 360 / COLORS_COUNT;
 
-    private final ImageView[] colorSquares = new ImageView[COLORS_COUNT + 1];
-    private final DatabaseHelper databaseHelper = new DatabaseHelper(this);
-    private boolean isNewNote = true;
-    private Note note;
+    private final ImageView[] mColorSquares = new ImageView[COLORS_COUNT + 1];
+    private final DatabaseHelper mDatabaseHelper = new DatabaseHelper(this);
+    private boolean mIsNewNote = true;
+    private Note mNote;
 
     @BindView(R.id.edit_scroll_view)
     ScrollView scrollView;
@@ -54,25 +54,25 @@ public class EditActivity extends AppCompatActivity {
 
         int margin = (int) getResources().getDimension(R.dimen.margin);
 
-        ImageView whiteSquare = makeColorSquare(Note.DEFAULT_COLOR, colorSquares);
+        ImageView whiteSquare = makeColorSquare(Note.DEFAULT_COLOR, mColorSquares);
         addSquareToLayout(whiteSquare, 0, 0, 0, 0);
-        colorSquares[0] = whiteSquare;
+        mColorSquares[0] = whiteSquare;
 
         for (int i = 0; i < COLORS_COUNT; i++) {
             int color = Color.HSVToColor(new float[]{COLOR_STEP * i, 0.15f, 1});
-            ImageView square = makeColorSquare(color, colorSquares);
+            ImageView square = makeColorSquare(color, mColorSquares);
             addSquareToLayout(square, margin, 0, 0, 0);
-            colorSquares[i + 1] = square;
+            mColorSquares[i + 1] = square;
         }
 
         changeActivityColor(0);
 
         if (getIntent().hasExtra(Note.NAME)) {
-            isNewNote = false;
-            note = (Note) getIntent().getSerializableExtra(Note.NAME);
+            mIsNewNote = false;
+            mNote = (Note) getIntent().getSerializableExtra(Note.NAME);
             findViewById(R.id.edit_delete).setVisibility(View.VISIBLE);
         } else {
-            note = new Note();
+            mNote = new Note();
         }
 
         initFromNote();
@@ -81,15 +81,15 @@ public class EditActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelable(Note.NAME, note);
+        outState.putParcelable(Note.NAME, mNote);
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        note = savedInstanceState.getParcelable(Note.NAME);
+        mNote = savedInstanceState.getParcelable(Note.NAME);
 
-        changeActivityColor(note.getColor());
+        changeActivityColor(mNote.getColor());
     }
 
     @Override
@@ -99,19 +99,19 @@ public class EditActivity extends AppCompatActivity {
     }
 
     private void initFromNote() {
-        noteTitle.setText(note.getTitle());
+        noteTitle.setText(mNote.getTitle());
 
-        if (note.getDescription() != null)
-            noteDescription.setText(note.getDescription());
+        if (mNote.getDescription() != null)
+            noteDescription.setText(mNote.getDescription());
 
-        changeActivityColor(note.getColor());
+        changeActivityColor(mNote.getColor());
     }
 
     private void changeActivityColor(int color) {
         appBarLayout.setBackgroundColor(color);
         scrollView.setBackgroundColor(color);
 
-        for (ImageView square : colorSquares) {
+        for (ImageView square : mColorSquares) {
             int squareColor = ((ColorDrawable) square.getBackground()).getColor();
             Drawable frame = (squareColor == color) ?
                     getDrawable(R.drawable.frame_highlited) : getDrawable(R.drawable.frame);
@@ -130,13 +130,13 @@ public class EditActivity extends AppCompatActivity {
             public void onClick(View v) {
                 for (ImageView s : squares) {
                     int color = ((ColorDrawable) s.getBackground()).getColor();
-                    if (color == note.getColor()) {
+                    if (color == mNote.getColor()) {
                         s.setImageDrawable(getDrawable(R.drawable.frame));
                     }
                 }
 
                 ((ImageView) v).setImageDrawable(getDrawable(R.drawable.frame_highlited));
-                note.setColor(color);
+                mNote.setColor(color);
                 changeActivityColor(color);
             }
         });
@@ -154,8 +154,8 @@ public class EditActivity extends AppCompatActivity {
 
     @OnClick(R.id.edit_exit)
     protected void exit() {
-        if (!isNewNote)
-            databaseHelper.refreshViewedDate(note.getId(),
+        if (!mIsNewNote)
+            mDatabaseHelper.refreshViewedDate(mNote.getId(),
                     getNowString());
         finish();
     }
@@ -179,22 +179,22 @@ public class EditActivity extends AppCompatActivity {
     }
 
     private void saveNote() {
-        note.setTitle(getTitleFromEditText());
-        note.setDescription(getDescriptionFromEditText());
+        mNote.setTitle(getTitleFromEditText());
+        mNote.setDescription(getDescriptionFromEditText());
 
         String now = getNowString();
-        note.setEdited(now);
-        note.setViewed(now);
+        mNote.setEdited(now);
+        mNote.setViewed(now);
 
-        if (isNewNote) {
-            databaseHelper.insert(note);
+        if (mIsNewNote) {
+            mDatabaseHelper.insert(mNote);
         } else {
-            databaseHelper.replace(note.getId(), note);
+            mDatabaseHelper.replace(mNote.getId(), mNote);
         }
     }
 
     private void deleteNote() {
-        databaseHelper.delete(note.getId());
+        mDatabaseHelper.delete(mNote.getId());
     }
 
     private String getDescriptionFromEditText() {

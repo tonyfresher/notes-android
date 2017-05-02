@@ -2,21 +2,21 @@ package com.tasks.notes;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.ContentResolver;
+import android.app.SearchManager;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -31,21 +31,20 @@ import com.tasks.notes.helpers.ImportExportHelper;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class ListActivity extends AppCompatActivity {
-    private static final String IMPORT_TAG = "IMPORT";
-    private static final String EXPORT_TAG = "EXPORT";
 
     private static final int REQUEST_PERMISSION_READ = 101;
     private static final int REQUEST_PERMISSION_WRITE = 102;
     private static final int REQUEST_FILE_TO_READ = 24;
 
-    private final DatabaseHelper databaseHelper = new DatabaseHelper(this);
+    private final DatabaseHelper mDatabaseHelper = new DatabaseHelper(this);
     private Comparator<Note> mDataComparator = Note.BY_CREATED_DESCENDING_COMPARATOR;
 
     @BindView(R.id.list_notes)
@@ -88,7 +87,10 @@ public class ListActivity extends AppCompatActivity {
                 if (bottomSheet.isSheetShowing()) {
                     bottomSheet.dismissSheet();
                 }
-                onResume();
+
+                Note[] data = mDatabaseHelper.getData(mDataComparator);
+                refreshList(data);
+
                 showFloatingButton(300);
                 return true;
             }
@@ -107,7 +109,11 @@ public class ListActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        final Note[] data = databaseHelper.getData(mDataComparator);
+        Note[] data = mDatabaseHelper.getData(mDataComparator);
+        refreshList(data);
+    }
+
+    private void refreshList(final Note[] data) {
         ContentAdapter adapter = new ContentAdapter(data, new ContentAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View v, int position) {
@@ -123,6 +129,41 @@ public class ListActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.activity_list, menu);
+
+        SearchView searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.menu_search));
+
+        SearchManager searchManager = (SearchManager) getSystemService(SEARCH_SERVICE);
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                Note[] notes = mDatabaseHelper.getData(mDataComparator);
+                List<Note> suitable = new ArrayList<>();
+                for (Note n : notes) {
+                    if (n.getTitle().contains(newText) || n.getDescription().contains(newText))
+                        suitable.add(n);
+                }
+
+                refreshList(suitable.toArray(new Note[suitable.size()]));
+                return true;
+            }
+        });
+
+        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
+            @Override
+            public boolean onClose() {
+                Note[] data = mDatabaseHelper.getData(mDataComparator);
+                refreshList(data);
+                return true;
+            }
+        });
+
         return true;
     }
 
@@ -162,9 +203,9 @@ public class ListActivity extends AppCompatActivity {
                 ImportExportHelper.importNotes(this, uri);
                 showToast(getString(R.string.successfully_imported), Toast.LENGTH_SHORT);
             } catch (IllegalAccessException e) {
-                showToast(getString(R.string.cant_read), Toast.LENGTH_SHORT);
+                showErrorDialog(getString(R.string.cant_read));
             } catch (IOException | JsonParseException e) {
-                showToast(getString(R.string.wrong_file), Toast.LENGTH_SHORT);
+                showErrorDialog(getString(R.string.wrong_file));
             }
         } else {
             requestPermission(
@@ -176,12 +217,12 @@ public class ListActivity extends AppCompatActivity {
         if (isPermissionAllowed(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
             try {
                 String file =
-                        ImportExportHelper.exportNotes(databaseHelper.getData(mDataComparator));
+                        ImportExportHelper.exportNotes(mDatabaseHelper.getData(mDataComparator));
                 showToast(getString(R.string.successfully_exported_to) + file, Toast.LENGTH_SHORT);
             } catch (IllegalAccessException e) {
-                showToast(getString(R.string.cant_write), Toast.LENGTH_SHORT);
+                showErrorDialog(getString(R.string.cant_write));
             } catch (IOException e) {
-                showToast(getString(R.string.wrong_file), Toast.LENGTH_SHORT);
+                showErrorDialog(getString(R.string.wrong_file));
             }
         } else {
             requestPermission(
@@ -198,7 +239,7 @@ public class ListActivity extends AppCompatActivity {
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     requestImportFile();
                 } else {
-                    showToast(getString(R.string.cant_read), Toast.LENGTH_SHORT);
+                    showErrorDialog(getString(R.string.cant_read));
                 }
                 return;
             case REQUEST_PERMISSION_WRITE: {
@@ -206,7 +247,7 @@ public class ListActivity extends AppCompatActivity {
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     tryExport();
                 } else {
-                    showToast(getString(R.string.cant_write), Toast.LENGTH_SHORT);
+                    showErrorDialog(getString(R.string.cant_write));
                 }
                 return;
             }
@@ -238,5 +279,15 @@ public class ListActivity extends AppCompatActivity {
 
     private void showToast(String message, int length) {
         Toast.makeText(this, message, length).show();
+    }
+
+    private void showErrorDialog(String message) {
+        String error = getString(R.string.error);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(error)
+                .setMessage(message)
+                .setPositiveButton("OK", null);
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 }
