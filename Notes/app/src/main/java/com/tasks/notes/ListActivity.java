@@ -26,8 +26,11 @@ import android.widget.Toast;
 import com.flipboard.bottomsheet.BottomSheetLayout;
 import com.flipboard.bottomsheet.commons.MenuSheetView;
 import com.google.gson.JsonParseException;
+import com.tasks.notes.adapters.NotesAdapter;
+import com.tasks.notes.classes.Filter;
+import com.tasks.notes.classes.Note;
 import com.tasks.notes.helpers.DatabaseHelper;
-import com.tasks.notes.helpers.ImportExportHelper;
+import com.tasks.notes.helpers.FileSystemHelper;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -40,20 +43,22 @@ import butterknife.ButterKnife;
 
 public class ListActivity extends AppCompatActivity {
 
-    private static final int REQUEST_PERMISSION_READ = 101;
-    private static final int REQUEST_PERMISSION_WRITE = 102;
-    private static final int REQUEST_FILE_TO_READ = 24;
+    private static final int REQUEST_PERMISSION_READ = 1;
+    private static final int REQUEST_PERMISSION_WRITE = 2;
+    private static final int RESULT_FILE_TO_READ = 42;
+    private static final int RESULT_FILTER = 24;
 
     private final DatabaseHelper mDatabaseHelper = new DatabaseHelper(this);
     private Comparator<Note> mDataComparator = Note.BY_CREATED_DESCENDING_COMPARATOR;
+    private boolean mAreNotesFiltered = false;
 
     @BindView(R.id.list_notes)
-    RecyclerView notesList;
-    @BindView(R.id.list_floating_add_button)
-    FloatingActionButton floatingAddButton;
+    RecyclerView mNotesList;
+    @BindView(R.id.list_add_floating_button)
+    FloatingActionButton mAddFloatingButton;
     @BindView(R.id.bottom_sheet_sort)
-    BottomSheetLayout bottomSheet;
-    MenuSheetView menuSheetView;
+    BottomSheetLayout mBottomSheet;
+    MenuSheetView mMenuSheetView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,9 +69,9 @@ public class ListActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.list_toolbar);
         setSupportActionBar(toolbar);
 
-        notesList.setLayoutManager(new LinearLayoutManager(this));
+        mNotesList.setLayoutManager(new LinearLayoutManager(this));
 
-        menuSheetView = new MenuSheetView(
+        mMenuSheetView = new MenuSheetView(
                 this, MenuSheetView.MenuType.LIST, "Sort...", new MenuSheetView.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
@@ -84,20 +89,20 @@ public class ListActivity extends AppCompatActivity {
                         mDataComparator = Note.BY_VIEWED_DESCENDING_COMPARATOR;
                         break;
                 }
-                if (bottomSheet.isSheetShowing()) {
-                    bottomSheet.dismissSheet();
+                if (mBottomSheet.isSheetShowing()) {
+                    mBottomSheet.dismissSheet();
                 }
 
-                Note[] data = mDatabaseHelper.getData(mDataComparator);
-                refreshList(data);
+                Note[] notes = mDatabaseHelper.getData(mDataComparator);
+                refreshList(notes);
 
                 showFloatingButton(300);
                 return true;
             }
         });
-        menuSheetView.inflateMenu(R.menu.bottom_sheet_sort);
+        mMenuSheetView.inflateMenu(R.menu.bottom_sheet_sort);
 
-        floatingAddButton.setOnClickListener(new View.OnClickListener() {
+        mAddFloatingButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(view.getContext(), EditActivity.class);
@@ -109,20 +114,23 @@ public class ListActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Note[] data = mDatabaseHelper.getData(mDataComparator);
-        refreshList(data);
+        if (!mAreNotesFiltered) {
+            Note[] notes = mDatabaseHelper.getData(mDataComparator);
+            refreshList(notes);
+        }
+        mAreNotesFiltered = false;
     }
 
-    private void refreshList(final Note[] data) {
-        ContentAdapter adapter = new ContentAdapter(data, new ContentAdapter.OnItemClickListener() {
+    private void refreshList(final Note[] notes) {
+        NotesAdapter adapter = new NotesAdapter(notes, new NotesAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View v, int position) {
                 Intent intent = new Intent(v.getContext(), EditActivity.class);
-                intent.putExtra(Note.NAME, (Serializable) data[position]);
+                intent.putExtra(Note.INTENT_EXTRA, (Serializable) notes[position]);
                 startActivity(intent);
             }
         });
-        notesList.setAdapter(adapter);
+        mNotesList.setAdapter(adapter);
     }
 
     @Override
@@ -155,15 +163,6 @@ public class ListActivity extends AppCompatActivity {
             }
         });
 
-        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
-            @Override
-            public boolean onClose() {
-                Note[] data = mDatabaseHelper.getData(mDataComparator);
-                refreshList(data);
-                return true;
-            }
-        });
-
         return true;
     }
 
@@ -174,9 +173,11 @@ public class ListActivity extends AppCompatActivity {
                 return true;
             case R.id.menu_sort:
                 hideFloatingButton(150);
-                bottomSheet.showWithSheetView(menuSheetView);
+                mBottomSheet.showWithSheetView(mMenuSheetView);
                 return true;
             case R.id.menu_filter:
+                Intent intent = new Intent(this, FilterActivity.class);
+                startActivityForResult(intent, RESULT_FILTER);
                 return true;
             case R.id.menu_import:
                 requestImportFile();
@@ -191,16 +192,37 @@ public class ListActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent resultData) {
-        if (requestCode == REQUEST_FILE_TO_READ && resultCode == Activity.RESULT_OK
-                && resultData != null) {
-            tryImport(resultData.getData());
+        switch (requestCode) {
+            case RESULT_FILE_TO_READ:
+                if (resultCode == Activity.RESULT_OK && resultData != null) {
+                    tryImport(resultData.getData());
+                }
+                return;
+            case RESULT_FILTER:
+                if (resultCode == Activity.RESULT_OK && resultData != null) {
+                    Filter filter = resultData.getExtras().getParcelable(Filter.INTENT_EXTRA);
+
+                    Note[] notes = mDatabaseHelper.getData(mDataComparator);
+                    List<Note> filtered = new ArrayList<>();
+
+                    for (Note n : notes) {
+                        if (filter.check(n)) {
+                            filtered.add(n);
+                        }
+                    }
+
+                    refreshList(
+                            filtered.toArray(new Note[filtered.size()]));
+                    mAreNotesFiltered = true;
+                }
+                return;
         }
     }
 
     private void tryImport(Uri uri) {
         if (isPermissionAllowed(Manifest.permission.READ_EXTERNAL_STORAGE)) {
             try {
-                ImportExportHelper.importNotes(this, uri);
+                FileSystemHelper.importNotes(this, uri);
                 showToast(getString(R.string.successfully_imported), Toast.LENGTH_SHORT);
             } catch (IllegalAccessException e) {
                 showErrorDialog(getString(R.string.cant_read));
@@ -217,7 +239,7 @@ public class ListActivity extends AppCompatActivity {
         if (isPermissionAllowed(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
             try {
                 String file =
-                        ImportExportHelper.exportNotes(mDatabaseHelper.getData(mDataComparator));
+                        FileSystemHelper.exportNotes(mDatabaseHelper.getData(mDataComparator));
                 showToast(getString(R.string.successfully_exported_to) + file, Toast.LENGTH_SHORT);
             } catch (IllegalAccessException e) {
                 showErrorDialog(getString(R.string.cant_write));
@@ -258,7 +280,7 @@ public class ListActivity extends AppCompatActivity {
         Intent exportIntent = new Intent(Intent.ACTION_GET_CONTENT);
         exportIntent.addCategory(Intent.CATEGORY_OPENABLE);
         exportIntent.setType("*/*");
-        startActivityForResult(exportIntent, REQUEST_FILE_TO_READ);
+        startActivityForResult(exportIntent, RESULT_FILE_TO_READ);
     }
 
     private boolean isPermissionAllowed(String permission) {
@@ -270,11 +292,11 @@ public class ListActivity extends AppCompatActivity {
     }
 
     private void showFloatingButton(int duration) {
-        floatingAddButton.animate().scaleX(1).scaleY(1).setDuration(duration).start();
+        mAddFloatingButton.animate().scaleX(1).scaleY(1).setDuration(duration).start();
     }
 
     private void hideFloatingButton(int duration) {
-        floatingAddButton.animate().scaleX(0).scaleY(0).setDuration(duration).start();
+        mAddFloatingButton.animate().scaleX(0).scaleY(0).setDuration(duration).start();
     }
 
     private void showToast(String message, int length) {

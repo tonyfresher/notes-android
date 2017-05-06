@@ -1,4 +1,4 @@
-package com.tasks.notes;
+package com.tasks.notes.adapters;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -8,7 +8,10 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-public class ContentAdapter extends RecyclerView.Adapter<ContentAdapter.ViewHolder> {
+import com.tasks.notes.classes.Note;
+import com.tasks.notes.R;
+
+public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.ViewHolder> {
     public interface OnItemClickListener {
         void onItemClick(View v, int position);
     }
@@ -16,7 +19,7 @@ public class ContentAdapter extends RecyclerView.Adapter<ContentAdapter.ViewHold
     private static OnItemClickListener mListener;
     private Note[] mData;
 
-    public ContentAdapter(Note[] objects, OnItemClickListener listener) {
+    public NotesAdapter(Note[] objects, OnItemClickListener listener) {
         mData = objects;
         mListener = listener;
     }
@@ -24,19 +27,19 @@ public class ContentAdapter extends RecyclerView.Adapter<ContentAdapter.ViewHold
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.list_item, parent, false);
+                .inflate(R.layout.note_item, parent, false);
         ViewHolder vh = new ViewHolder(v);
         return vh;
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.mTitle.setText(mData[position].getTitle());
-        holder.mDescription.setText(mData[position].getDescription());
-        holder.mContainer.setBackgroundColor(mData[position].getColor());
-        holder.mTitle.setVisibility("".equals(mData[position].getTitle()) ?
+        holder.title.setText(mData[position].getTitle());
+        holder.description.setText(mData[position].getDescription());
+        holder.container.setBackgroundColor(mData[position].getColor());
+        holder.title.setVisibility("".equals(mData[position].getTitle()) ?
                 View.GONE : View.VISIBLE);
-        holder.mDescription.setVisibility("".equals(mData[position].getDescription()) ?
+        holder.description.setVisibility("".equals(mData[position].getDescription()) ?
                 View.GONE : View.VISIBLE);
     }
 
@@ -46,15 +49,15 @@ public class ContentAdapter extends RecyclerView.Adapter<ContentAdapter.ViewHold
     }
 
     protected static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        TextView mTitle;
-        TextView mDescription;
-        RelativeLayout mContainer;
+        TextView title;
+        TextView description;
+        RelativeLayout container;
 
         public ViewHolder(View viewItem) {
             super(viewItem);
-            mTitle = (TextView) viewItem.findViewById(R.id.list_item_title);
-            mDescription = (TextView) viewItem.findViewById(R.id.list_item_description);
-            mContainer = (RelativeLayout) viewItem.findViewById(R.id.list_item_container);
+            title = (TextView) viewItem.findViewById(R.id.list_item_title);
+            description = (TextView) viewItem.findViewById(R.id.list_item_description);
+            container = (RelativeLayout) viewItem.findViewById(R.id.list_item_container);
 
             viewItem.setOnClickListener(this);
         }

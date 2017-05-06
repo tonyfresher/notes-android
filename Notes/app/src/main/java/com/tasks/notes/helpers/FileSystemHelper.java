@@ -3,22 +3,15 @@ package com.tasks.notes.helpers;
 
 import android.content.ContentResolver;
 import android.content.Context;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
-import com.tasks.notes.Note;
+import com.tasks.notes.classes.Filter;
+import com.tasks.notes.classes.Note;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -27,11 +20,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.lang.reflect.Type;
 
-public class ImportExportHelper {
+public class FileSystemHelper {
     public final static Gson gsonSerializer = new GsonBuilder()
-            .registerTypeAdapter(Note.class, new NoteSerializer())
+            .registerTypeAdapter(Note.class, new Note.Serializer())
+            .registerTypeAdapter(Filter.class, new Filter.Serializer())
             .create();
     public final static String FILE_NAME = "itemlist.ili";
 
@@ -112,33 +105,5 @@ public class ImportExportHelper {
         if (notes == null)
             throw new JsonParseException("Wrong format");
         return notes;
-    }
-
-    public static class NoteSerializer implements JsonSerializer<Note>, JsonDeserializer<Note> {
-        @Override
-        public JsonElement serialize(final Note note, final Type type, final JsonSerializationContext context) {
-            JsonObject result = new JsonObject();
-            result.add("title", new JsonPrimitive(note.getTitle()));
-            result.add("description", new JsonPrimitive(note.getDescription()));
-            result.add("color", new JsonPrimitive(
-                    String.format("#%06X", (0xFFFFFF & note.getColor()))));
-            result.add("created", new JsonPrimitive(note.getCreated()));
-            result.add("edited", new JsonPrimitive(note.getEdited()));
-            result.add("viewed", new JsonPrimitive(note.getViewed()));
-            return result;
-        }
-
-        @Override
-        public Note deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
-                throws JsonParseException {
-            JsonObject jObject = json.getAsJsonObject();
-            String title = jObject.get("title").getAsString();
-            String description = jObject.get("description").getAsString();
-            int color = Color.parseColor(jObject.get("color").getAsString());
-            String created = jObject.get("created").getAsString();
-            String edited = jObject.get("edited").getAsString();
-            String viewed = jObject.get("viewed").getAsString();
-            return new Note(0, title, description, color, created, edited, viewed);
-        }
     }
 }

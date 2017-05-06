@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.NonNull;
 
-import com.tasks.notes.Note;
+import com.tasks.notes.classes.Note;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -92,7 +92,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return data;
     }
 
-    private Note[] getAllItems() {
+    public Note[] getAllItems() {
         ArrayList<Note> notes = new ArrayList<>();
 
         try (SQLiteDatabase db = this.getWritableDatabase()) {

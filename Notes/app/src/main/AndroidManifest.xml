@@ -24,7 +24,10 @@
         <activity
             android:name=".EditActivity"
             android:parentActivityName=".ListActivity"
-            android:windowSoftInputMode="stateHidden"></activity>
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".FilterActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>

@@ -1,0 +1,204 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <EditText
+            android:id="@+id/filter_name"
+            style="@style/FullWidthEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/filter_name"
+            android:textStyle="bold" />
+
+        <View style="@style/Divider" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="8dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:paddingTop="8dp">
+
+            <TextView
+                android:id="@+id/filter_created_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/created_label"
+                android:paddingBottom="8dp"
+                android:paddingTop="8dp"
+                android:textSize="@dimen/abc_text_size_subhead_material" />
+
+            <TextView
+                android:id="@+id/filter_created_from"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/created_label"
+                android:paddingBottom="8dp"
+                android:paddingTop="8dp"
+                android:text="@string/from"
+                android:textSize="@dimen/abc_text_size_subhead_material"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/filter_created_to"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/created_label"
+                android:paddingBottom="8dp"
+                android:paddingTop="8dp"
+                android:text="@string/to"
+                android:textSize="@dimen/abc_text_size_subhead_material"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
+        <View style="@style/Divider" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="8dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:paddingTop="8dp">
+
+            <TextView
+                android:id="@+id/filter_edited_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/edited_label"
+                android:paddingBottom="8dp"
+                android:paddingTop="8dp"
+                android:textSize="@dimen/abc_text_size_subhead_material" />
+
+            <TextView
+                android:id="@+id/filter_edited_from"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/created_label"
+                android:paddingBottom="8dp"
+                android:paddingTop="8dp"
+                android:text="@string/from"
+                android:textSize="@dimen/abc_text_size_subhead_material"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/filter_edited_to"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/created_label"
+                android:paddingBottom="8dp"
+                android:paddingTop="8dp"
+                android:text="@string/to"
+                android:textSize="@dimen/abc_text_size_subhead_material"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
+        <View style="@style/Divider" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="8dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:paddingTop="8dp">
+
+            <TextView
+                android:id="@+id/filter_viewed_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/viewed_label"
+                android:paddingBottom="8dp"
+                android:paddingTop="8dp"
+                android:textSize="@dimen/abc_text_size_subhead_material" />
+
+            <TextView
+                android:id="@+id/filter_viewed_from"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/created_label"
+                android:paddingBottom="8dp"
+                android:paddingTop="8dp"
+                android:text="@string/from"
+                android:textSize="@dimen/abc_text_size_subhead_material"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/filter_viewed_to"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/created_label"
+                android:paddingBottom="8dp"
+                android:paddingTop="8dp"
+                android:text="@string/to"
+                android:textSize="@dimen/abc_text_size_subhead_material"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
+        <View style="@style/Divider" />
+
+        <HorizontalScrollView
+            android:id="@+id/filter_colors"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_margin="16dp"
+            android:overScrollMode="never"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:id="@+id/filter_colors_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+            </LinearLayout>
+
+        </HorizontalScrollView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:orientation="horizontal"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingRight="@dimen/activity_horizontal_margin">
+
+            <Button
+                android:id="@+id/filter_save_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/save_button" />
+
+            <Button
+                android:id="@+id/filter_apply_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:backgroundTint="@color/colorAccent"
+                android:text="@string/apply_button" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>
