@@ -11,9 +11,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.widget.ImageView;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import com.tasks.notes.classes.Filter;
 
@@ -21,34 +20,44 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class FilterActivity extends AppCompatActivity {
-    public final static Gson gsonSerializer = new GsonBuilder()
-            .registerTypeAdapter(Filter.class, new Filter.Serializer())
-            .create();
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
-    private FilterPagerAdapter mFilterPagerAdapter;
-    private ViewPager mViewPager;
+import static com.tasks.notes.helpers.FileSystemHelper.GSON_SERIALIZER;
+
+public class FilterActivity extends AppCompatActivity {
     private SavedFiltersPage mSavedFiltersPage;
-    private CreateFilterPage mCreateFilterPage;
+    private EditFilterPage mEditFilterPage;
+
+    @BindView(R.id.tabs)
+    TabLayout mTabLayout;
+    @BindView(R.id.container)
+    ViewPager mViewPager;
+    @BindView(R.id.filter_toolbar)
+    Toolbar mToolbar;
+    @BindView(R.id.filter_exit)
+    ImageView mExitButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_filter);
+        ButterKnife.bind(this);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.filter_toolbar);
-        setSupportActionBar(toolbar);
+        setSupportActionBar(mToolbar);
 
-        mFilterPagerAdapter = new FilterPagerAdapter(getSupportFragmentManager());
+        mExitButton.setOnClickListener(v -> finish());
 
-        mViewPager = (ViewPager) findViewById(R.id.container);
-        mViewPager.setAdapter(mFilterPagerAdapter);
+        FilterPagerAdapter filterPagerAdapter =
+                new FilterPagerAdapter(getSupportFragmentManager());
+
+        mViewPager.setAdapter(filterPagerAdapter);
+        mViewPager.setCurrentItem(1);
+
+        mTabLayout.setupWithViewPager(mViewPager);
 
         mSavedFiltersPage = new SavedFiltersPage();
-        mCreateFilterPage = new CreateFilterPage();
-
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(mViewPager);
+        mEditFilterPage = new EditFilterPage();
     }
 
     public void refreshSavedList() {
@@ -57,7 +66,7 @@ public class FilterActivity extends AppCompatActivity {
     }
 
     public void saveFilterToPrefs(Filter filter) {
-        String json = gsonSerializer.toJson(filter);
+        String json = GSON_SERIALIZER.toJson(filter);
         SharedPreferences sharedPref = getPreferences(MODE_PRIVATE);
         sharedPref.edit()
                 .putString(filter.getName(), json)
@@ -71,9 +80,10 @@ public class FilterActivity extends AppCompatActivity {
             if (entry.getValue() instanceof String) {
                 String json = (String) entry.getValue();
                 try {
-                    Filter f = gsonSerializer.fromJson(json, Filter.class);
+                    Filter f = GSON_SERIALIZER.fromJson(json, Filter.class);
                     filters.add(f);
-                } catch (JsonParseException e) {}
+                } catch (JsonParseException e) {
+                }
             }
         }
 
@@ -85,6 +95,11 @@ public class FilterActivity extends AppCompatActivity {
         intent.putExtra(Filter.INTENT_EXTRA, result);
         setResult(RESULT_OK, intent);
         finish();
+    }
+
+    public void setFilter(Filter filter) {
+        mViewPager.setCurrentItem(1);
+        mEditFilterPage.initFromFilter(filter);
     }
 
     public class FilterPagerAdapter extends FragmentPagerAdapter {
@@ -99,7 +114,7 @@ public class FilterActivity extends AppCompatActivity {
                 case 0:
                     return mSavedFiltersPage;
                 case 1:
-                    return mCreateFilterPage;
+                    return mEditFilterPage;
             }
             return null;
         }

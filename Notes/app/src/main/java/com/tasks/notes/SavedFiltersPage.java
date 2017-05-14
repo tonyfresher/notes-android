@@ -37,12 +37,9 @@ public class SavedFiltersPage extends Fragment {
     }
 
     public void refreshList(final Filter[] filters) {
-        FiltersAdapter adapter = new FiltersAdapter(filters, new FiltersAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(View v, int position) {
-                FilterActivity context = ((FilterActivity) v.getContext());
-                context.exitWithResult(filters[position]);
-            }
+        FiltersAdapter adapter = new FiltersAdapter(filters, (v, position) -> {
+            FilterActivity context = ((FilterActivity) v.getContext());
+            context.setFilter(filters[position]);
         });
         mSavedFiltersList.setAdapter(adapter);
     }

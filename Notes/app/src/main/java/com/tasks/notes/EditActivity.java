@@ -1,11 +1,12 @@
 package com.tasks.notes;
 
-import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -13,6 +14,7 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.Toast;
 
+import com.squareup.picasso.Picasso;
 import com.tasks.notes.classes.Note;
 import com.tasks.notes.helpers.ColorsHelper;
 import com.tasks.notes.helpers.DatabaseHelper;
@@ -44,6 +46,10 @@ public class EditActivity extends AppCompatActivity implements SquareFactory {
     @BindView(R.id.edit_colors_layout)
     LinearLayout mColorsLayout;
     ImageView[] mColorSquares;
+    @BindView(R.id.edit_image_url)
+    EditText mNoteImageUrl;
+    @BindView(R.id.edit_image)
+    ImageView mNoteImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +71,26 @@ public class EditActivity extends AppCompatActivity implements SquareFactory {
         } else {
             mNote = new Note();
         }
+
+        mNoteImageUrl.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String text = s.toString();
+                if ("".equals(text)) {
+                    mNoteImage.setVisibility(View.GONE);
+                } else {
+                    tryLoadPicture(s.toString());
+                }
+            }
+        });
 
         initFromNote();
     }
@@ -95,7 +121,20 @@ public class EditActivity extends AppCompatActivity implements SquareFactory {
         if (mNote.getDescription() != null)
             mNoteDescription.setText(mNote.getDescription());
 
+        if (mNote.getImageUrl() != null && !mNote.getImageUrl().isEmpty()) {
+            mNoteImageUrl.setText(mNote.getImageUrl());
+            tryLoadPicture(mNote.getImageUrl());
+        }
+
         changeActivityColor(mNote.getColor());
+    }
+
+    private void tryLoadPicture(String url) {
+        mNoteImage.setVisibility(View.VISIBLE);
+        Picasso.with(this)
+                .load(url)
+                .error(R.drawable.wrong_image)
+                .into(mNoteImage);
     }
 
     private void changeActivityColor(int color) {
@@ -105,23 +144,18 @@ public class EditActivity extends AppCompatActivity implements SquareFactory {
     }
 
     public ImageView makeColorSquare(final int color, final ImageView[] squares) {
-        ImageView square = ColorsHelper.makeSquare(this, color, new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                for (ImageView s : squares) {
-                    int color = ((ColorDrawable) s.getBackground()).getColor();
-                    if (color == mNote.getColor()) {
-                        s.setImageDrawable(getDrawable(R.drawable.frame));
-                    }
+        return ColorsHelper.makeSquare(this, color, v -> {
+            for (ImageView s : squares) {
+                int color1 = ((ColorDrawable) s.getBackground()).getColor();
+                if (color1 == mNote.getColor()) {
+                    s.setImageDrawable(getDrawable(R.drawable.frame));
                 }
-
-                ((ImageView) v).setImageDrawable(getDrawable(R.drawable.frame_highlited));
-                mNote.setColor(color);
-                changeActivityColor(color);
             }
-        });
 
-        return square;
+            ((ImageView) v).setImageDrawable(getDrawable(R.drawable.frame_highlited));
+            mNote.setColor(color);
+            changeActivityColor(color);
+        });
     }
 
     @OnClick(R.id.edit_exit)
@@ -155,8 +189,15 @@ public class EditActivity extends AppCompatActivity implements SquareFactory {
     }
 
     private void saveNote() {
-        mNote.setTitle(getTitleFromEditText());
-        mNote.setDescription(getDescriptionFromEditText());
+        if (!mNoteTitle.getText().toString().isEmpty()) {
+            mNote.setTitle(mNoteTitle.getText().toString());
+        }
+        if (!mNoteDescription.getText().toString().isEmpty()) {
+            mNote.setDescription(mNoteDescription.getText().toString());
+        }
+        if (!mNoteImageUrl.getText().toString().isEmpty()) {
+            mNote.setImageUrl(mNoteImageUrl.getText().toString());
+        }
 
         String now = ISO8601_DATE_FORMAT.format(new Date());
         mNote.setEdited(now);
@@ -171,13 +212,5 @@ public class EditActivity extends AppCompatActivity implements SquareFactory {
 
     private void deleteNote() {
         mDatabaseHelper.delete(mNote.getId());
-    }
-
-    private String getDescriptionFromEditText() {
-        return mNoteDescription.getText().toString();
-    }
-
-    private String getTitleFromEditText() {
-        return mNoteTitle.getText().toString();
     }
 }

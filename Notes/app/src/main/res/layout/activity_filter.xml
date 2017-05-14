@@ -17,16 +17,15 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
-            app:layout_scrollFlags="scroll|enterAlways"
             app:popupTheme="@style/AppTheme.NoActionBar.PopupOverlay">
 
             <RelativeLayout
-                android:id="@+id/edit_toolbar_layout"
+                android:id="@+id/filter_toolbar_layout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
                 <ImageView
-                    android:id="@+id/edit_exit"
+                    android:id="@+id/filter_exit"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_alignParentStart="true"

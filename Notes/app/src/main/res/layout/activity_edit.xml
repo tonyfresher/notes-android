@@ -10,7 +10,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:fitsSystemWindows="true"
         android:focusable="true"
         android:focusableInTouchMode="true"
@@ -75,16 +75,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/name"
-            android:paddingBottom="8dp"
             android:textStyle="bold" />
+
+        <View style="@style/Divider" />
 
         <EditText
             android:id="@+id/edit_description"
             style="@style/FullWidthEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/description"
-            android:paddingTop="8dp" />
+            android:hint="@string/description" />
 
         <View style="@style/Divider" />
 
@@ -106,6 +106,23 @@
             </LinearLayout>
 
         </HorizontalScrollView>
+
+        <View style="@style/Divider" />
+
+        <EditText
+            android:id="@+id/edit_image_url"
+            style="@style/FullWidthEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/image_url" />
+
+        <ImageView
+            android:id="@+id/edit_image"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:scaleType="center"
+            android:visibility="gone" />
 
     </LinearLayout>
 

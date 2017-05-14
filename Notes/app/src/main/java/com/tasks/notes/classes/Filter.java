@@ -12,9 +12,10 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
+import org.joda.time.LocalDate;
+
 import java.lang.reflect.Type;
 import java.text.ParseException;
-import java.util.Date;
 
 import static com.tasks.notes.helpers.DateHelper.ISO8601_DATE_FORMAT;
 
@@ -22,7 +23,7 @@ import static com.tasks.notes.helpers.DateHelper.ISO8601_DATE_FORMAT;
 public class Filter implements Parcelable {
     public final static String INTENT_EXTRA = "Filter";
 
-    private String name = "";
+    private String name;
     private int color;
     private String createdFrom;
     private String createdTo;
@@ -32,6 +33,7 @@ public class Filter implements Parcelable {
     private String viewedTo;
 
     public Filter() {
+        name = "";
     }
 
     public Filter(String name, int color,
@@ -125,28 +127,23 @@ public class Filter implements Parcelable {
 
     public boolean check(Note note) {
         try {
-            if ((color == 0 || color == note.getColor())
-
+            return ((color == 0 || color == note.getColor())
                     && (createdFrom == null || dateBefore(createdFrom, note.getCreated()))
                     && (createdTo == null || dateBefore(note.getCreated(), createdTo))
-
                     && (editedFrom == null || dateBefore(editedFrom, note.getEdited()))
                     && (editedTo == null || dateBefore(note.getEdited(), editedTo))
-
                     && (viewedFrom == null || dateBefore(viewedFrom, note.getViewed()))
-                    && (viewedTo == null || dateBefore(note.getViewed(), viewedTo))) {
-                return true;
-            }
+                    && (viewedTo == null || dateBefore(note.getViewed(), viewedTo)));
         } catch (ParseException e) {
+            return false;
         }
-        return false;
     }
 
     private boolean dateBefore(String s1, String s2)
             throws ParseException {
-        Date d1 = ISO8601_DATE_FORMAT.parse(s1);
-        Date d2 = ISO8601_DATE_FORMAT.parse(s2);
-        return d1.before(d2);
+        LocalDate d1 = new LocalDate(ISO8601_DATE_FORMAT.parse(s1));
+        LocalDate d2 = new LocalDate(ISO8601_DATE_FORMAT.parse(s2));
+        return d1.compareTo(d2) <= 0;
     }
 
     public static final Creator<Filter> CREATOR = new Creator<Filter>() {
@@ -178,55 +175,93 @@ public class Filter implements Parcelable {
         dest.writeString(viewedTo);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Filter filter = (Filter) o;
+
+        if (color != filter.color) return false;
+        if (name != null ? !name.equals(filter.name) : filter.name != null) return false;
+        if (createdFrom != null ? !createdFrom.equals(filter.createdFrom) : filter.createdFrom != null)
+            return false;
+        if (createdTo != null ? !createdTo.equals(filter.createdTo) : filter.createdTo != null)
+            return false;
+        if (editedFrom != null ? !editedFrom.equals(filter.editedFrom) : filter.editedFrom != null)
+            return false;
+        if (editedTo != null ? !editedTo.equals(filter.editedTo) : filter.editedTo != null)
+            return false;
+        if (viewedFrom != null ? !viewedFrom.equals(filter.viewedFrom) : filter.viewedFrom != null)
+            return false;
+        return viewedTo != null ? viewedTo.equals(filter.viewedTo) : filter.viewedTo == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = name != null ? name.hashCode() : 0;
+        result = 31 * result + color;
+        result = 31 * result + (createdFrom != null ? createdFrom.hashCode() : 0);
+        result = 31 * result + (createdTo != null ? createdTo.hashCode() : 0);
+        result = 31 * result + (editedFrom != null ? editedFrom.hashCode() : 0);
+        result = 31 * result + (editedTo != null ? editedTo.hashCode() : 0);
+        result = 31 * result + (viewedFrom != null ? viewedFrom.hashCode() : 0);
+        result = 31 * result + (viewedTo != null ? viewedTo.hashCode() : 0);
+        return result;
+    }
+
     public static class Serializer implements JsonSerializer<Filter>, JsonDeserializer<Filter> {
         @Override
         public JsonElement serialize(final Filter filter, final Type type, final JsonSerializationContext context) {
             JsonObject result = new JsonObject();
-            addStringToJson(result, "name", filter.name);
+            tryAddString(result, "name", filter.name);
 
             if (filter.color != 0) {
                 result.add("color", new JsonPrimitive(filter.color));
             }
 
-            addStringToJson(result, "createdFrom", filter.createdFrom);
-            addStringToJson(result, "createdTo", filter.createdTo);
+            tryAddString(result, "createdFrom", filter.createdFrom);
+            tryAddString(result, "createdTo", filter.createdTo);
 
-            addStringToJson(result, "editedFrom", filter.editedFrom);
-            addStringToJson(result, "editedTo", filter.editedTo);
+            tryAddString(result, "editedFrom", filter.editedFrom);
+            tryAddString(result, "editedTo", filter.editedTo);
 
-            addStringToJson(result, "viewedFrom", filter.viewedFrom);
-            addStringToJson(result, "viewedTo", filter.viewedTo);
+            tryAddString(result, "viewedFrom", filter.viewedFrom);
+            tryAddString(result, "viewedTo", filter.viewedTo);
 
             return result;
-        }
-
-        private static void addStringToJson(JsonObject jObject, String name, String field) {
-            if (field != null) {
-                jObject.add(name, new JsonPrimitive(field));
-            }
         }
 
         @Override
         public Filter deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
                 throws JsonParseException {
-            JsonObject jObject = json.getAsJsonObject();
-            String name = jObject.get("name").getAsString();
+            JsonObject object = json.getAsJsonObject();
+            String name = tryGetString(object, "name");
 
-            int color = jObject.has("color") ? jObject.get("color").getAsInt() : 0;
+            int color = object.has("color") ? object.get("color").getAsInt() : 0;
 
-            String createdFrom = jObject.has("createdFrom") ? jObject.get("createdFrom").getAsString() : null;
-            String createdTo = jObject.has("createdTo") ? jObject.get("createdTo").getAsString() : null;
+            String createdFrom = tryGetString(object, "createdFrom");
+            String createdTo = tryGetString(object, "createdTo");
 
-            String editedFrom = jObject.has("editedFrom") ? jObject.get("editedFrom").getAsString() : null;
-            String editedTo = jObject.has("editedTo") ? jObject.get("editedTo").getAsString() : null;
+            String editedFrom = tryGetString(object, "editedFrom");
+            String editedTo = tryGetString(object, "editedTo");
 
-            String viewedFrom = jObject.has("viewedFrom") ? jObject.get("viewedFrom").getAsString() : null;
-            String viewedTo = jObject.has("viewedTo") ? jObject.get("viewedTo").getAsString() : null;
+            String viewedFrom = tryGetString(object, "viewedFrom");
+            String viewedTo = tryGetString(object, "viewedTo");
 
             return new Filter(name, color,
                     createdFrom, createdTo,
                     editedFrom, editedTo,
                     viewedFrom, viewedTo);
+        }
+
+        private static void tryAddString(JsonObject object, String name, String value) {
+            if (value != null) object.add(name, new JsonPrimitive(value));
+        }
+
+        private static String tryGetString(JsonObject object, String name) {
+            return object.has(name) ? object.get(name).getAsString() : null;
         }
     }
 }

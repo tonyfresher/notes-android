@@ -5,8 +5,10 @@ import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -20,7 +22,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Toast;
 
 import com.flipboard.bottomsheet.BottomSheetLayout;
@@ -54,8 +55,8 @@ public class ListActivity extends AppCompatActivity {
 
     @BindView(R.id.list_notes)
     RecyclerView mNotesList;
-    @BindView(R.id.list_add_floating_button)
-    FloatingActionButton mAddFloatingButton;
+    @BindView(R.id.list_floating_button)
+    FloatingActionButton mFloatingButton;
     @BindView(R.id.bottom_sheet_sort)
     BottomSheetLayout mBottomSheet;
     MenuSheetView mMenuSheetView;
@@ -72,63 +73,51 @@ public class ListActivity extends AppCompatActivity {
         mNotesList.setLayoutManager(new LinearLayoutManager(this));
 
         mMenuSheetView = new MenuSheetView(
-                this, MenuSheetView.MenuType.LIST, "Sort...", new MenuSheetView.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.bottom_sheet_sort_by_name:
-                        mDataComparator = Note.BY_NAME_COMPARATOR;
-                        break;
-                    case R.id.bottom_sheet_sort_by_created:
-                        mDataComparator = Note.BY_CREATED_DESCENDING_COMPARATOR;
-                        break;
-                    case R.id.bottom_sheet_sort_by_edited:
-                        mDataComparator = Note.BY_EDITED_DESCENDING_COMPARATOR;
-                        break;
-                    case R.id.bottom_sheet_sort_by_viewed:
-                        mDataComparator = Note.BY_VIEWED_DESCENDING_COMPARATOR;
-                        break;
-                }
-                if (mBottomSheet.isSheetShowing()) {
-                    mBottomSheet.dismissSheet();
-                }
-
-                Note[] notes = mDatabaseHelper.getData(mDataComparator);
-                refreshList(notes);
-
-                showFloatingButton(300);
-                return true;
+                this, MenuSheetView.MenuType.LIST, "Sort...", item -> {
+            switch (item.getItemId()) {
+                case R.id.bottom_sheet_sort_by_name:
+                    mDataComparator = Note.BY_NAME_COMPARATOR;
+                    break;
+                case R.id.bottom_sheet_sort_by_created:
+                    mDataComparator = Note.BY_CREATED_DESCENDING_COMPARATOR;
+                    break;
+                case R.id.bottom_sheet_sort_by_edited:
+                    mDataComparator = Note.BY_EDITED_DESCENDING_COMPARATOR;
+                    break;
+                case R.id.bottom_sheet_sort_by_viewed:
+                    mDataComparator = Note.BY_VIEWED_DESCENDING_COMPARATOR;
+                    break;
             }
+            if (mBottomSheet.isSheetShowing()) {
+                mBottomSheet.dismissSheet();
+            }
+
+            Note[] notes = mDatabaseHelper.getOrderedItems(mDataComparator);
+            refreshList(notes);
+
+            showFloatingButton();
+            return true;
         });
         mMenuSheetView.inflateMenu(R.menu.bottom_sheet_sort);
 
-        mAddFloatingButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(view.getContext(), EditActivity.class);
-                startActivity(intent);
-            }
-        });
+        setAddFloatingButton();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         if (!mAreNotesFiltered) {
-            Note[] notes = mDatabaseHelper.getData(mDataComparator);
+            Note[] notes = mDatabaseHelper.getOrderedItems(mDataComparator);
             refreshList(notes);
         }
         mAreNotesFiltered = false;
     }
 
     private void refreshList(final Note[] notes) {
-        NotesAdapter adapter = new NotesAdapter(notes, new NotesAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(View v, int position) {
-                Intent intent = new Intent(v.getContext(), EditActivity.class);
-                intent.putExtra(Note.INTENT_EXTRA, (Serializable) notes[position]);
-                startActivity(intent);
-            }
+        NotesAdapter adapter = new NotesAdapter(notes, (v, position) -> {
+            Intent intent = new Intent(v.getContext(), EditActivity.class);
+            intent.putExtra(Note.INTENT_EXTRA, (Serializable) notes[position]);
+            startActivity(intent);
         });
         mNotesList.setAdapter(adapter);
     }
@@ -151,7 +140,7 @@ public class ListActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                Note[] notes = mDatabaseHelper.getData(mDataComparator);
+                Note[] notes = mDatabaseHelper.getOrderedItems(mDataComparator);
                 List<Note> suitable = new ArrayList<>();
                 for (Note n : notes) {
                     if (n.getTitle().contains(newText) || n.getDescription().contains(newText))
@@ -172,7 +161,7 @@ public class ListActivity extends AppCompatActivity {
             case R.id.menu_search:
                 return true;
             case R.id.menu_sort:
-                hideFloatingButton(150);
+                hideFloatingButton();
                 mBottomSheet.showWithSheetView(mMenuSheetView);
                 return true;
             case R.id.menu_filter:
@@ -184,6 +173,12 @@ public class ListActivity extends AppCompatActivity {
                 return true;
             case R.id.menu_export:
                 tryExport();
+                return true;
+            case R.id.menu_create10000:
+                insert100000();
+                return true;
+            case R.id.menu_clear_all:
+                clearAll();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -202,7 +197,7 @@ public class ListActivity extends AppCompatActivity {
                 if (resultCode == Activity.RESULT_OK && resultData != null) {
                     Filter filter = resultData.getExtras().getParcelable(Filter.INTENT_EXTRA);
 
-                    Note[] notes = mDatabaseHelper.getData(mDataComparator);
+                    Note[] notes = mDatabaseHelper.getOrderedItems(mDataComparator);
                     List<Note> filtered = new ArrayList<>();
 
                     for (Note n : notes) {
@@ -210,6 +205,8 @@ public class ListActivity extends AppCompatActivity {
                             filtered.add(n);
                         }
                     }
+
+                    setRefreshFloatingButton();
 
                     refreshList(
                             filtered.toArray(new Note[filtered.size()]));
@@ -239,7 +236,7 @@ public class ListActivity extends AppCompatActivity {
         if (isPermissionAllowed(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
             try {
                 String file =
-                        FileSystemHelper.exportNotes(mDatabaseHelper.getData(mDataComparator));
+                        FileSystemHelper.exportNotes(mDatabaseHelper.getOrderedItems(mDataComparator));
                 showToast(getString(R.string.successfully_exported_to) + file, Toast.LENGTH_SHORT);
             } catch (IllegalAccessException e) {
                 showErrorDialog(getString(R.string.cant_write));
@@ -252,9 +249,25 @@ public class ListActivity extends AppCompatActivity {
         }
     }
 
+    private void requestImportFile() {
+        Intent exportIntent = new Intent(Intent.ACTION_GET_CONTENT);
+        exportIntent.addCategory(Intent.CATEGORY_OPENABLE);
+        exportIntent.setType("*/*");
+        startActivityForResult(exportIntent, RESULT_FILE_TO_READ);
+    }
+
+    private void insert100000() {
+    }
+
+    private void clearAll() {
+        mDatabaseHelper.dropTable();
+        onResume();
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
+                                           @NonNull String permissions[],
+                                           @NonNull int[] grantResults) {
         switch (requestCode) {
             case REQUEST_PERMISSION_READ:
                 if (grantResults.length > 0
@@ -276,13 +289,6 @@ public class ListActivity extends AppCompatActivity {
         }
     }
 
-    private void requestImportFile() {
-        Intent exportIntent = new Intent(Intent.ACTION_GET_CONTENT);
-        exportIntent.addCategory(Intent.CATEGORY_OPENABLE);
-        exportIntent.setType("*/*");
-        startActivityForResult(exportIntent, RESULT_FILE_TO_READ);
-    }
-
     private boolean isPermissionAllowed(String permission) {
         return ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED;
     }
@@ -291,12 +297,38 @@ public class ListActivity extends AppCompatActivity {
         ActivityCompat.requestPermissions(this, new String[]{permission}, request);
     }
 
-    private void showFloatingButton(int duration) {
-        mAddFloatingButton.animate().scaleX(1).scaleY(1).setDuration(duration).start();
+    private void setAddFloatingButton() {
+        mFloatingButton.setBackgroundTintList(ColorStateList.valueOf(
+                ContextCompat.getColor(this, R.color.colorAccent)));
+        mFloatingButton.setImageDrawable(
+                getDrawable(R.drawable.ic_add_white_24dp));
+        mFloatingButton.setOnClickListener(v -> {
+            Intent intent = new Intent(v.getContext(), EditActivity.class);
+            startActivity(intent);
+        });
     }
 
-    private void hideFloatingButton(int duration) {
-        mAddFloatingButton.animate().scaleX(0).scaleY(0).setDuration(duration).start();
+    private void setRefreshFloatingButton() {
+        mFloatingButton.setBackgroundTintList(ColorStateList.valueOf(
+                ContextCompat.getColor(this, R.color.red)));
+        mFloatingButton.setImageDrawable(
+                getDrawable(R.drawable.ic_close_white_24dp));
+        mFloatingButton.setOnClickListener(v -> {
+            setAddFloatingButton();
+            onResume();
+        });
+    }
+
+    private void showFloatingButton() {
+        mFloatingButton.animate()
+                .scaleX(1).scaleY(1).setDuration(300)
+                .start();
+    }
+
+    private void hideFloatingButton() {
+        mFloatingButton.animate()
+                .scaleX(0).scaleY(0).setDuration(150)
+                .start();
     }
 
     private void showToast(String message, int length) {

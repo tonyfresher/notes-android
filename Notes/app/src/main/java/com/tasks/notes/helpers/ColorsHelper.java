@@ -15,11 +15,11 @@ public class ColorsHelper {
         ImageView makeColorSquare(final int color, final ImageView[] squares);
     }
 
-    public final static int COLORS_COUNT = 9;
-    public static int COLOR_STEP = 360 / COLORS_COUNT;
-    public static float COLOR_LIGHTNESS = 0.3f;
+    public static final int COLORS_COUNT = 9;
+    public static final int COLOR_STEP = 360 / COLORS_COUNT;
+    public static final float COLOR_LIGHTNESS = 0.3f;
 
-    public final static int DEFAULT_COLOR = Color.parseColor("#ffffff");
+    public final static int DEFAULT_NOTE_COLOR = Color.parseColor("#ffffff");
 
     public static ImageView makeSquare(Context context, final int color, View.OnClickListener listener) {
         ImageView square = new ImageView(context);
@@ -30,7 +30,7 @@ public class ColorsHelper {
         return square;
     }
 
-    public static void addSquareToLayout(LinearLayout layout, ImageView square,
+    private static void addSquareToLayout(LinearLayout layout, ImageView square,
                                          int left, int top, int right, int bottom) {
         int size = (int) layout.getContext()
                 .getResources().getDimension(R.dimen.color_square_size);
@@ -51,7 +51,7 @@ public class ColorsHelper {
 
     public static ImageView[] makeSquares(SquareFactory factory, LinearLayout layout, int margin) {
         ImageView[] squares = new ImageView[COLORS_COUNT + 1];
-        ImageView defaultSquare = factory.makeColorSquare(DEFAULT_COLOR, squares);
+        ImageView defaultSquare = factory.makeColorSquare(DEFAULT_NOTE_COLOR, squares);
         addSquareToLayout(layout, defaultSquare, 0, 0, 0, 0);
         squares[0] = defaultSquare;
 

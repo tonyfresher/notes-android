@@ -22,12 +22,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private final static String NOTE_CREATED = "Created";
     private final static String NOTE_EDITED = "Edited";
     private final static String NOTE_VIEWED = "Viewed";
+    private final static String NOTE_IMAGE_URL = "imageUrl";
 
     private final static String CREATE_TABLE_QUERY = String.format(
             "CREATE TABLE %s(%s INTEGER PRIMARY KEY AUTOINCREMENT, %s TEXT, %s TEXT, %s INTEGER, " +
-                    "%s TEXT, %s TEXT, %s TEXT)",
+                    "%s TEXT, %s TEXT, %s TEXT, %s TEXT)",
             TABLE_NAME, NOTE_ROWID, NOTE_TITLE, NOTE_DESCRIPTION, NOTE_COLOR,
-            NOTE_CREATED, NOTE_EDITED, NOTE_VIEWED);
+            NOTE_CREATED, NOTE_EDITED, NOTE_VIEWED, NOTE_IMAGE_URL);
     private final static String DROP_TABLE_QUERY = "DROP TABLE IF EXISTS " + TABLE_NAME;
     private final static String SELECT_ALL_QUERY = "SELECT  * FROM " + TABLE_NAME;
     private final static String UPDATE_VIEWED_WHERE_ROWID_QUERY = String.format(
@@ -86,45 +87,47 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    public Note[] getData(@NonNull Comparator<Note> comparator) {
-        Note[] data = getAllItems();
-        Arrays.sort(data, comparator);
-        return data;
-    }
-
-    public Note[] getAllItems() {
+    public Note[] getItems() {
         ArrayList<Note> notes = new ArrayList<>();
 
         try (SQLiteDatabase db = this.getWritableDatabase()) {
-            Cursor cursor = db.rawQuery(SELECT_ALL_QUERY, null);
+            Cursor c = db.rawQuery(SELECT_ALL_QUERY, null);
 
-            if (cursor.moveToFirst()) {
-                int iRow = cursor.getColumnIndex(NOTE_ROWID);
-                int iName = cursor.getColumnIndex(NOTE_TITLE);
-                int iDescription = cursor.getColumnIndex(NOTE_DESCRIPTION);
-                int iColor = cursor.getColumnIndex(NOTE_COLOR);
-                int iCreated = cursor.getColumnIndex(NOTE_CREATED);
-                int iEdited = cursor.getColumnIndex(NOTE_EDITED);
-                int iViewed = cursor.getColumnIndex(NOTE_VIEWED);
+            if (c.moveToFirst()) {
+                int iRow = c.getColumnIndex(NOTE_ROWID);
+                int iName = c.getColumnIndex(NOTE_TITLE);
+                int iDescription = c.getColumnIndex(NOTE_DESCRIPTION);
+                int iColor = c.getColumnIndex(NOTE_COLOR);
+                int iCreated = c.getColumnIndex(NOTE_CREATED);
+                int iEdited = c.getColumnIndex(NOTE_EDITED);
+                int iViewed = c.getColumnIndex(NOTE_VIEWED);
+                int iImageUrl = c.getColumnIndex(NOTE_IMAGE_URL);
 
 
                 do {
                     Note item = new Note(
-                            cursor.getLong(iRow),
-                            cursor.getString(iName),
-                            cursor.getString(iDescription),
-                            cursor.getInt(iColor),
-                            cursor.getString(iCreated),
-                            cursor.getString(iEdited),
-                            cursor.getString(iViewed));
+                            c.getLong(iRow),
+                            c.getString(iName),
+                            c.getString(iDescription),
+                            c.getString(iImageUrl),
+                            c.getInt(iColor),
+                            c.getString(iCreated),
+                            c.getString(iEdited),
+                            c.getString(iViewed));
 
                     notes.add(item);
-                } while (cursor.moveToNext());
+                } while (c.moveToNext());
             }
         }
 
         Note[] notesArray = new Note[notes.size()];
         return notes.toArray(notesArray);
+    }
+
+    public Note[] getOrderedItems(@NonNull Comparator<Note> comparator) {
+        Note[] items = getItems();
+        Arrays.sort(items, comparator);
+        return items;
     }
 
     private ContentValues getContentValuesFromNote(Note note) {
@@ -135,6 +138,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(NOTE_CREATED, note.getCreated());
         values.put(NOTE_EDITED, note.getEdited());
         values.put(NOTE_VIEWED, note.getViewed());
+        values.put(NOTE_IMAGE_URL, note.getImageUrl());
         return values;
     }
 }

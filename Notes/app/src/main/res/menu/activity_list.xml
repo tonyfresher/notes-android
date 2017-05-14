@@ -23,4 +23,13 @@
         android:id="@+id/menu_export"
         android:title="@string/exportToFile"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/menu_create10000"
+        android:title="@string/create100000"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_clear_all"
+        android:title="@string/clear_all"
+        app:showAsAction="never" />
 </menu>

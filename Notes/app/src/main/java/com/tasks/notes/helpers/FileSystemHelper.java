@@ -20,9 +20,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.util.Arrays;
+import java.util.Comparator;
 
 public class FileSystemHelper {
-    public final static Gson gsonSerializer = new GsonBuilder()
+    public final static Gson GSON_SERIALIZER = new GsonBuilder()
             .registerTypeAdapter(Note.class, new Note.Serializer())
             .registerTypeAdapter(Filter.class, new Filter.Serializer())
             .create();
@@ -38,11 +40,22 @@ public class FileSystemHelper {
         ContentResolver cr = context.getContentResolver();
         try (InputStream fis = cr.openInputStream(uri)) {
             String input = getInputContent(fis, "UTF-8");
-            Note[] notes = jsonToNotes(input);
-
             DatabaseHelper dh = new DatabaseHelper(context);
-            for (Note note : notes) {
-                dh.insert(note);
+            Comparator<Note> comparator = Note.BY_CREATED_DESCENDING_COMPARATOR;
+
+            Note[] notesToImport = jsonToNotes(input);
+            Arrays.sort(notesToImport, comparator);
+
+            Note[] notesInDb = dh.getOrderedItems(comparator);
+
+            insertion:
+            for (Note that : notesToImport) {
+                for (Note other: notesInDb) {
+                    if (that.contentEquals(other)) {
+                        continue insertion;
+                    }
+                }
+                dh.insert(that);
             }
         }
     }
@@ -68,19 +81,13 @@ public class FileSystemHelper {
 
     public static boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            return true;
-        }
-        return false;
+        return Environment.MEDIA_MOUNTED.equals(state);
     }
 
     public static boolean isExternalStorageReadable() {
         String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state) ||
-                Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
-            return true;
-        }
-        return false;
+        return Environment.MEDIA_MOUNTED.equals(state) ||
+                Environment.MEDIA_MOUNTED_READ_ONLY.equals(state);
     }
 
     public static String getInputContent(InputStream fis, String encoding)
@@ -96,12 +103,12 @@ public class FileSystemHelper {
     }
 
     public static String notesToJson(Note[] notes) {
-        return gsonSerializer.toJson(notes);
+        return GSON_SERIALIZER.toJson(notes);
     }
 
     public static Note[] jsonToNotes(String json)
             throws JsonParseException {
-        Note[] notes = gsonSerializer.fromJson(json, Note[].class);
+        Note[] notes = GSON_SERIALIZER.fromJson(json, Note[].class);
         if (notes == null)
             throw new JsonParseException("Wrong format");
         return notes;
