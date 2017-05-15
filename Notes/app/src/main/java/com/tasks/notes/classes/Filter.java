@@ -14,7 +14,6 @@ import com.google.gson.JsonSerializer;
 import com.tasks.notes.helpers.DateHelper;
 
 import java.lang.reflect.Type;
-import java.text.ParseException;
 
 
 public class Filter implements Parcelable {
@@ -124,12 +123,12 @@ public class Filter implements Parcelable {
 
     public boolean check(Note note) {
         return ((color == 0 || color == note.getColor())
-                && (createdFrom == null || DateHelper.before(createdFrom, note.getCreated()))
-                && (createdTo == null || DateHelper.before(note.getCreated(), createdTo))
-                && (editedFrom == null || DateHelper.before(editedFrom, note.getEdited()))
-                && (editedTo == null || DateHelper.before(note.getEdited(), editedTo))
-                && (viewedFrom == null || DateHelper.before(viewedFrom, note.getViewed()))
-                && (viewedTo == null || DateHelper.before(note.getViewed(), viewedTo)));
+                && (createdFrom == null || DateHelper.dateBefore(createdFrom, note.getCreated()))
+                && (createdTo == null || DateHelper.dateBefore(note.getCreated(), createdTo))
+                && (editedFrom == null || DateHelper.dateBefore(editedFrom, note.getEdited()))
+                && (editedTo == null || DateHelper.dateBefore(note.getEdited(), editedTo))
+                && (viewedFrom == null || DateHelper.dateBefore(viewedFrom, note.getViewed()))
+                && (viewedTo == null || DateHelper.dateBefore(note.getViewed(), viewedTo)));
     }
 
     public static final Creator<Filter> CREATOR = new Creator<Filter>() {
