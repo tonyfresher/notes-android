@@ -1,11 +1,51 @@
 <resources>
     <string name="app_name">Notes</string>
-    <string name="edit_save">SAVE</string>
-    <string name="edit_delete">DELETE</string>
-    <string name="edit_change_color">Choose color</string>
-    <string name="edit_name">Name</string>
-    <string name="edit_description">Description</string>
+
+    <string name="name">Name</string>
+    <string name="title">Title</string>
+    <string name="description">Description</string>
+    <string name="image_url">Image URL</string>
+    <string name="started">Started</string>
+    <string name="performing">Performing...</string>
+    <string name="completed">Completed</string>
+
     <string name="note_saved">Note saved</string>
     <string name="note_deleted">Note deleted</string>
+
+    <string name="search">Search</string>
+    <string name="sort">Sort</string>
+    <string name="filter">Filter</string>
+    <string name="importFile">Import</string>
+    <string name="exportToFile">Export</string>
+    <string name="create100000">Create 100000</string>
+    <string name="clear_all">Clear all</string>
+
+    <string name="by_name">By title</string>
+    <string name="by_created">By createdFrom time</string>
+    <string name="by_edited">By editedFrom time</string>
+    <string name="by_viewed">By viewedFrom time</string>
+
+    <string name="cant_write">Can\'t write: permission denied</string>
+    <string name="cant_read">Can\'t read: permission denied</string>
+    <string name="wrong_file">Wrong file</string>
+    <string name="error">Error</string>
+    <string name="successfully_imported">Notes are successfully imported</string>
+    <string name="successfully_exported_to">Notes are successfully exported to</string>
+
+    <string name="apply_button">APPLY</string>
+    <string name="save_button">SAVE</string>
+    <string name="delete_button">DELETE</string>
+
+    <string name="filter_name">Filter name</string>
+    <string name="created_label">Created</string>
+    <string name="edited_label">Edited</string>
+    <string name="viewed_label">Viewed</string>
+    <string name="from">From</string>
+    <string name="to">To</string>
+    <string name="enter_name">Please enter a name</string>
+    <string name="filter_was_saved">Filter was saved</string>
+    <string name="saved_filters_tab">SAVED</string>
+    <string name="create_filter_tab">CREATE</string>
+
     <string name="preferences_file">com.tasks.notes.preferences</string>
 </resources>
