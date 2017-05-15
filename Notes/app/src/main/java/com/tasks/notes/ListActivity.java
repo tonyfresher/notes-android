@@ -38,6 +38,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -140,14 +142,9 @@ public class ListActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                Note[] notes = mDatabaseHelper.getOrderedItems(mDataComparator);
-                List<Note> suitable = new ArrayList<>();
-                for (Note n : notes) {
-                    if (n.getTitle().contains(newText) || n.getDescription().contains(newText))
-                        suitable.add(n);
+                if (!newText.isEmpty()) {
+                    refreshList(mDatabaseHelper.searchBySubstring(newText));
                 }
-
-                refreshList(suitable.toArray(new Note[suitable.size()]));
                 return true;
             }
         });
