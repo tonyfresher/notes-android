@@ -17,7 +17,6 @@ import android.widget.Toast;
 
 import com.tasks.notes.classes.Filter;
 import com.tasks.notes.helpers.ColorsHelper;
-import com.tasks.notes.helpers.DateHelper;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;

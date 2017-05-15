@@ -13,7 +13,6 @@ import com.tasks.notes.classes.Note;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private final static String TABLE_NAME = "Notes";

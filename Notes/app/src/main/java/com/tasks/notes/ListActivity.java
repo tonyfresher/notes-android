@@ -33,9 +33,6 @@ import com.tasks.notes.classes.Note;
 import com.tasks.notes.helpers.DatabaseHelper;
 import com.tasks.notes.helpers.FileSystemHelper;
 
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
-
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;

@@ -197,43 +197,54 @@ public class Filter implements Parcelable {
     }
 
     public static class Serializer implements JsonSerializer<Filter>, JsonDeserializer<Filter> {
+        public final static String NAME = "name";
+        public final static String COLOR = "color";
+        public final static String CREATED_FROM = "createdFrom";
+        public final static String CREATED_TO = "createdTo";
+        public final static String EDITED_FROM = "editedFrom";
+        public final static String EDITED_TO = "editedTo";
+        public final static String VIEWED_FROM = "viewedFrom";
+        public final static String VIEWED_TO = "viewedTo";
+
         @Override
-        public JsonElement serialize(final Filter filter, final Type type, final JsonSerializationContext context) {
+        public JsonElement serialize(final Filter filter, final Type type,
+                                     final JsonSerializationContext context) {
             JsonObject result = new JsonObject();
-            tryAddString(result, "name", filter.name);
+            tryAddString(result, NAME, filter.name);
 
             if (filter.color != 0) {
-                result.add("color", new JsonPrimitive(filter.color));
+                result.add(COLOR, new JsonPrimitive(filter.color));
             }
 
-            tryAddString(result, "createdFrom", filter.createdFrom);
-            tryAddString(result, "createdTo", filter.createdTo);
+            tryAddString(result, CREATED_FROM, filter.createdFrom);
+            tryAddString(result, CREATED_TO, filter.createdTo);
 
-            tryAddString(result, "editedFrom", filter.editedFrom);
-            tryAddString(result, "editedTo", filter.editedTo);
+            tryAddString(result, EDITED_FROM, filter.editedFrom);
+            tryAddString(result, EDITED_TO, filter.editedTo);
 
-            tryAddString(result, "viewedFrom", filter.viewedFrom);
-            tryAddString(result, "viewedTo", filter.viewedTo);
+            tryAddString(result, VIEWED_FROM, filter.viewedFrom);
+            tryAddString(result, VIEWED_TO, filter.viewedTo);
 
             return result;
         }
 
         @Override
-        public Filter deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+        public Filter deserialize(JsonElement json, Type typeOfT,
+                                  JsonDeserializationContext context)
                 throws JsonParseException {
             JsonObject object = json.getAsJsonObject();
-            String name = tryGetString(object, "name");
+            String name = tryGetString(object, NAME);
 
-            int color = object.has("color") ? object.get("color").getAsInt() : 0;
+            int color = object.has(COLOR) ? object.get(COLOR).getAsInt() : 0;
 
-            String createdFrom = tryGetString(object, "createdFrom");
-            String createdTo = tryGetString(object, "createdTo");
+            String createdFrom = tryGetString(object, CREATED_FROM);
+            String createdTo = tryGetString(object, CREATED_TO);
 
-            String editedFrom = tryGetString(object, "editedFrom");
-            String editedTo = tryGetString(object, "editedTo");
+            String editedFrom = tryGetString(object, EDITED_FROM);
+            String editedTo = tryGetString(object, EDITED_TO);
 
-            String viewedFrom = tryGetString(object, "viewedFrom");
-            String viewedTo = tryGetString(object, "viewedTo");
+            String viewedFrom = tryGetString(object, VIEWED_FROM);
+            String viewedTo = tryGetString(object, VIEWED_TO);
 
             return new Filter(name, color,
                     createdFrom, createdTo,

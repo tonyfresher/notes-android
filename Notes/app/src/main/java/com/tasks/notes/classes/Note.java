@@ -16,19 +16,16 @@ import com.google.gson.JsonSerializer;
 
 import java.io.Serializable;
 import java.lang.reflect.Type;
-import java.text.ParseException;
 import java.util.Comparator;
-import java.util.Date;
 
 import com.tasks.notes.helpers.ColorsHelper;
-import com.tasks.notes.helpers.DateHelper;
 
 import org.joda.time.DateTime;
 
 import static com.tasks.notes.helpers.DateHelper.ISO8601_DATE_FORMAT;
 
 public class Note implements Serializable, Parcelable {
-    public final static String INTENT_EXTRA = "Note";
+    public final static String INTENT_EXTRA = "note";
 
     private long id;
     private String title;
@@ -213,17 +210,25 @@ public class Note implements Serializable, Parcelable {
     }
 
     public static class Serializer implements JsonSerializer<Note>, JsonDeserializer<Note> {
+        public final static String TITLE = "title";
+        public final static String DESCRIPTION = "description";
+        public final static String IMAGE_URL = "imageUrl";
+        public final static String COLOR = "color";
+        public final static String CREATED = "created";
+        public final static String EDITED = "edited";
+        public final static String VIEWED = "viewed";
+
         @Override
         public JsonElement serialize(final Note note, final Type type, final JsonSerializationContext context) {
             JsonObject result = new JsonObject();
-            tryAddString(result, "title", note.title);
-            tryAddString(result, "description", note.description);
-            tryAddString(result,"imageUrl", note.imageUrl);
-            result.add("color", new JsonPrimitive(
+            tryAddString(result, TITLE, note.title);
+            tryAddString(result, DESCRIPTION, note.description);
+            tryAddString(result, IMAGE_URL, note.imageUrl);
+            result.add(COLOR, new JsonPrimitive(
                     String.format("#%06X", (0xFFFFFF & note.color))));
-            result.add("created", new JsonPrimitive(note.created));
-            result.add("edited", new JsonPrimitive(note.edited));
-            result.add("viewed", new JsonPrimitive(note.viewed));
+            result.add(CREATED, new JsonPrimitive(note.created));
+            result.add(EDITED, new JsonPrimitive(note.edited));
+            result.add(VIEWED, new JsonPrimitive(note.viewed));
 
             return result;
         }
@@ -232,13 +237,13 @@ public class Note implements Serializable, Parcelable {
         public Note deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
                 throws JsonParseException {
             JsonObject object = json.getAsJsonObject();
-            String title = tryGetString(object, "title");
-            String description = tryGetString(object, "description");
-            String imageUrl = tryGetString(object, "imageUrl");
-            int color = Color.parseColor(object.get("color").getAsString());
-            String created = object.get("created").getAsString();
-            String edited = object.get("edited").getAsString();
-            String viewed = object.get("viewed").getAsString();
+            String title = tryGetString(object, TITLE);
+            String description = tryGetString(object, DESCRIPTION);
+            String imageUrl = tryGetString(object, IMAGE_URL);
+            int color = Color.parseColor(object.get(COLOR).getAsString());
+            String created = object.get(CREATED).getAsString();
+            String edited = object.get(EDITED).getAsString();
+            String viewed = object.get(VIEWED).getAsString();
 
             return new Note(0, title, description, imageUrl, color, created, edited, viewed);
         }
