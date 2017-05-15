@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import com.tasks.notes.classes.Filter;
 import com.tasks.notes.helpers.ColorsHelper;
+import com.tasks.notes.helpers.DateHelper;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
@@ -123,7 +124,7 @@ public class EditFilterPage extends Fragment implements
             LocalDate now = new LocalDate();
             new DatePickerDialog(v.getContext(),
                     (DatePicker view, int year, int month, int dayOfMonth) -> {
-                        LocalDate d = new LocalDate(year, month, dayOfMonth);
+                        DateTime d = new DateTime(year, month, dayOfMonth, 0, 0);
                         mFilter.setCreatedFrom(ISO8601_DATE_FORMAT.print(d));
                         mCreatedFrom.setText(HUMAN_READABLE_DATE_FORMAT.print(d));
                     },
@@ -135,7 +136,7 @@ public class EditFilterPage extends Fragment implements
             LocalDate now = new LocalDate();
             new DatePickerDialog(v.getContext(),
                     (DatePicker view, int year, int month, int dayOfMonth) -> {
-                        LocalDate d = new LocalDate(year, month, dayOfMonth);
+                        DateTime d = new DateTime(year, month, dayOfMonth, 0, 0);
                         mFilter.setCreatedTo(ISO8601_DATE_FORMAT.print(d));
                         mCreatedTo.setText(HUMAN_READABLE_DATE_FORMAT.print(d));
                     },
@@ -147,7 +148,7 @@ public class EditFilterPage extends Fragment implements
             LocalDate now = new LocalDate();
             new DatePickerDialog(v.getContext(),
                     (DatePicker view, int year, int month, int dayOfMonth) -> {
-                        LocalDate d = new LocalDate(year, month, dayOfMonth);
+                        DateTime d = new DateTime(year, month, dayOfMonth, 0, 0);
                         mFilter.setEditedFrom(ISO8601_DATE_FORMAT.print(d));
                         mEditedFrom.setText(HUMAN_READABLE_DATE_FORMAT.print(d));
                     },
@@ -159,7 +160,7 @@ public class EditFilterPage extends Fragment implements
             LocalDate now = new LocalDate();
             new DatePickerDialog(v.getContext(),
                     (DatePicker view, int year, int month, int dayOfMonth) -> {
-                        LocalDate d = new LocalDate(year, month, dayOfMonth);
+                        DateTime d = new DateTime(year, month, dayOfMonth, 0, 0);
                         mFilter.setEditedTo(ISO8601_DATE_FORMAT.print(d));
                         mEditedTo.setText(HUMAN_READABLE_DATE_FORMAT.print(d));
                     },
@@ -171,7 +172,7 @@ public class EditFilterPage extends Fragment implements
             LocalDate now = new LocalDate();
             new DatePickerDialog(v.getContext(),
                     (DatePicker view, int year, int month, int dayOfMonth) -> {
-                        LocalDate d = new LocalDate(year, month, dayOfMonth);
+                        DateTime d = new DateTime(year, month, dayOfMonth, 0, 0);
                         mFilter.setViewedFrom(ISO8601_DATE_FORMAT.print(d));
                         mViewedFrom.setText(HUMAN_READABLE_DATE_FORMAT.print(d));
                     },
@@ -183,7 +184,7 @@ public class EditFilterPage extends Fragment implements
             LocalDate now = new LocalDate();
             new DatePickerDialog(v.getContext(),
                     (DatePicker view, int year, int month, int dayOfMonth) -> {
-                        LocalDate d = new LocalDate(year, month, dayOfMonth);
+                        DateTime d = new DateTime(year, month, dayOfMonth, 0, 0);
                         mFilter.setViewedTo(ISO8601_DATE_FORMAT.print(d));
                         mViewedTo.setText(HUMAN_READABLE_DATE_FORMAT.print(d));
                     },

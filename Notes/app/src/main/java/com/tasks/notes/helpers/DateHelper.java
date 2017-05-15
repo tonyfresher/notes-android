@@ -4,15 +4,11 @@ import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.DateTimeFormatterBuilder;
 import org.joda.time.format.ISODateTimeFormat;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 
 public class DateHelper {
     public final static DateTimeFormatter ISO8601_DATE_FORMAT =
-            ISODateTimeFormat.dateTime();
+            ISODateTimeFormat.dateTimeNoMillis();
 
     public final static DateTimeFormatter HUMAN_READABLE_DATE_FORMAT =
             DateTimeFormat.forPattern("E, d MMM yyyy");

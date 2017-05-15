@@ -33,13 +33,14 @@ import com.tasks.notes.classes.Note;
 import com.tasks.notes.helpers.DatabaseHelper;
 import com.tasks.notes.helpers.FileSystemHelper;
 
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -109,8 +110,8 @@ public class ListActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if (!mAreNotesFiltered) {
-            Note[] notes = mDatabaseHelper.getOrderedItems(mDataComparator);
-            refreshList(notes);
+            refreshList(mDatabaseHelper.getOrderedItems(mDataComparator));
+            setAddFloatingButton();
         }
         mAreNotesFiltered = false;
     }
