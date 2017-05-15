@@ -16,10 +16,14 @@ import com.google.gson.JsonSerializer;
 
 import java.io.Serializable;
 import java.lang.reflect.Type;
+import java.text.ParseException;
 import java.util.Comparator;
 import java.util.Date;
 
 import com.tasks.notes.helpers.ColorsHelper;
+import com.tasks.notes.helpers.DateHelper;
+
+import org.joda.time.DateTime;
 
 import static com.tasks.notes.helpers.DateHelper.ISO8601_DATE_FORMAT;
 
@@ -41,7 +45,7 @@ public class Note implements Serializable, Parcelable {
 
     public Note() {
         color = ColorsHelper.DEFAULT_NOTE_COLOR;
-        String now = ISO8601_DATE_FORMAT.format(new Date());
+        String now = ISO8601_DATE_FORMAT.print(new DateTime());
         created = now;
         edited = now;
         viewed = now;
@@ -249,9 +253,15 @@ public class Note implements Serializable, Parcelable {
     }
 
     public final static Comparator<Note> BY_NAME_COMPARATOR =
-            (Note o1, Note o2) -> o1.title.compareTo(o2.title);
-    public final static Comparator<Note> BY_NAME_DESCENDING_COMPARATOR =
-            (Note o1, Note o2) -> o2.title.compareTo(o1.title);
+            (Note o1, Note o2) ->  {
+                if (o1.title == null ^ o2.title == null) {
+                    return (o1.title == null) ? -1 : 1;
+                }
+                if (o2.title == null && o2.title == null) {
+                    return 0;
+                }
+                return o1.title.compareToIgnoreCase(o2.title);
+            };
     public final static Comparator<Note> BY_CREATED_DESCENDING_COMPARATOR =
             (Note o1, Note o2) -> o2.created.compareTo(o1.created);
     public final static Comparator<Note> BY_EDITED_DESCENDING_COMPARATOR =

@@ -11,13 +11,10 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
-
-import org.joda.time.LocalDate;
+import com.tasks.notes.helpers.DateHelper;
 
 import java.lang.reflect.Type;
 import java.text.ParseException;
-
-import static com.tasks.notes.helpers.DateHelper.ISO8601_DATE_FORMAT;
 
 
 public class Filter implements Parcelable {
@@ -126,24 +123,13 @@ public class Filter implements Parcelable {
     }
 
     public boolean check(Note note) {
-        try {
-            return ((color == 0 || color == note.getColor())
-                    && (createdFrom == null || dateBefore(createdFrom, note.getCreated()))
-                    && (createdTo == null || dateBefore(note.getCreated(), createdTo))
-                    && (editedFrom == null || dateBefore(editedFrom, note.getEdited()))
-                    && (editedTo == null || dateBefore(note.getEdited(), editedTo))
-                    && (viewedFrom == null || dateBefore(viewedFrom, note.getViewed()))
-                    && (viewedTo == null || dateBefore(note.getViewed(), viewedTo)));
-        } catch (ParseException e) {
-            return false;
-        }
-    }
-
-    private boolean dateBefore(String s1, String s2)
-            throws ParseException {
-        LocalDate d1 = new LocalDate(ISO8601_DATE_FORMAT.parse(s1));
-        LocalDate d2 = new LocalDate(ISO8601_DATE_FORMAT.parse(s2));
-        return d1.compareTo(d2) <= 0;
+        return ((color == 0 || color == note.getColor())
+                && (createdFrom == null || DateHelper.before(createdFrom, note.getCreated()))
+                && (createdTo == null || DateHelper.before(note.getCreated(), createdTo))
+                && (editedFrom == null || DateHelper.before(editedFrom, note.getEdited()))
+                && (editedTo == null || DateHelper.before(note.getEdited(), editedTo))
+                && (viewedFrom == null || DateHelper.before(viewedFrom, note.getViewed()))
+                && (viewedTo == null || DateHelper.before(note.getViewed(), viewedTo)));
     }
 
     public static final Creator<Filter> CREATOR = new Creator<Filter>() {

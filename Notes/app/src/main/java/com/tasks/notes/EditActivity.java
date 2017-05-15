@@ -19,7 +19,7 @@ import com.tasks.notes.classes.Note;
 import com.tasks.notes.helpers.ColorsHelper;
 import com.tasks.notes.helpers.DatabaseHelper;
 
-import java.util.Date;
+import org.joda.time.DateTime;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -162,7 +162,7 @@ public class EditActivity extends AppCompatActivity implements SquareFactory {
     protected void exit() {
         if (!mIsNewNote)
             mDatabaseHelper.refreshViewedDate(mNote.getId(),
-                    ISO8601_DATE_FORMAT.format(new Date()));
+                    ISO8601_DATE_FORMAT.print(new DateTime()));
 
         setResult(RESULT_CANCELED);
         finish();
@@ -199,7 +199,7 @@ public class EditActivity extends AppCompatActivity implements SquareFactory {
             mNote.setImageUrl(mNoteImageUrl.getText().toString());
         }
 
-        String now = ISO8601_DATE_FORMAT.format(new Date());
+        String now = ISO8601_DATE_FORMAT.print(new DateTime());
         mNote.setEdited(now);
         mNote.setViewed(now);
 

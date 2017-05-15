@@ -18,10 +18,8 @@ import android.widget.Toast;
 import com.tasks.notes.classes.Filter;
 import com.tasks.notes.helpers.ColorsHelper;
 
+import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-
-import java.text.ParseException;
-import java.util.Date;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -126,8 +124,8 @@ public class EditFilterPage extends Fragment implements
             new DatePickerDialog(v.getContext(),
                     (DatePicker view, int year, int month, int dayOfMonth) -> {
                         LocalDate d = new LocalDate(year, month, dayOfMonth);
-                        mFilter.setCreatedFrom(ISO8601_DATE_FORMAT.format(d.toDate()));
-                        mCreatedFrom.setText(HUMAN_READABLE_DATE_FORMAT.format(d.toDate()));
+                        mFilter.setCreatedFrom(ISO8601_DATE_FORMAT.print(d));
+                        mCreatedFrom.setText(HUMAN_READABLE_DATE_FORMAT.print(d));
                     },
                     now.getYear(), now.getMonthOfYear(), now.getDayOfMonth())
                     .show();
@@ -138,8 +136,8 @@ public class EditFilterPage extends Fragment implements
             new DatePickerDialog(v.getContext(),
                     (DatePicker view, int year, int month, int dayOfMonth) -> {
                         LocalDate d = new LocalDate(year, month, dayOfMonth);
-                        mFilter.setCreatedTo(ISO8601_DATE_FORMAT.format(d.toDate()));
-                        mCreatedTo.setText(HUMAN_READABLE_DATE_FORMAT.format(d.toDate()));
+                        mFilter.setCreatedTo(ISO8601_DATE_FORMAT.print(d));
+                        mCreatedTo.setText(HUMAN_READABLE_DATE_FORMAT.print(d));
                     },
                     now.getYear(), now.getMonthOfYear(), now.getDayOfMonth())
                     .show();
@@ -150,8 +148,8 @@ public class EditFilterPage extends Fragment implements
             new DatePickerDialog(v.getContext(),
                     (DatePicker view, int year, int month, int dayOfMonth) -> {
                         LocalDate d = new LocalDate(year, month, dayOfMonth);
-                        mFilter.setEditedFrom(ISO8601_DATE_FORMAT.format(d.toDate()));
-                        mEditedFrom.setText(HUMAN_READABLE_DATE_FORMAT.format(d.toDate()));
+                        mFilter.setEditedFrom(ISO8601_DATE_FORMAT.print(d));
+                        mEditedFrom.setText(HUMAN_READABLE_DATE_FORMAT.print(d));
                     },
                     now.getYear(), now.getMonthOfYear(), now.getDayOfMonth())
                     .show();
@@ -162,8 +160,8 @@ public class EditFilterPage extends Fragment implements
             new DatePickerDialog(v.getContext(),
                     (DatePicker view, int year, int month, int dayOfMonth) -> {
                         LocalDate d = new LocalDate(year, month, dayOfMonth);
-                        mFilter.setEditedTo(ISO8601_DATE_FORMAT.format(d.toDate()));
-                        mEditedTo.setText(HUMAN_READABLE_DATE_FORMAT.format(d.toDate()));
+                        mFilter.setEditedTo(ISO8601_DATE_FORMAT.print(d));
+                        mEditedTo.setText(HUMAN_READABLE_DATE_FORMAT.print(d));
                     },
                     now.getYear(), now.getMonthOfYear(), now.getDayOfMonth())
                     .show();
@@ -174,8 +172,8 @@ public class EditFilterPage extends Fragment implements
             new DatePickerDialog(v.getContext(),
                     (DatePicker view, int year, int month, int dayOfMonth) -> {
                         LocalDate d = new LocalDate(year, month, dayOfMonth);
-                        mFilter.setViewedFrom(ISO8601_DATE_FORMAT.format(d.toDate()));
-                        mViewedFrom.setText(HUMAN_READABLE_DATE_FORMAT.format(d.toDate()));
+                        mFilter.setViewedFrom(ISO8601_DATE_FORMAT.print(d));
+                        mViewedFrom.setText(HUMAN_READABLE_DATE_FORMAT.print(d));
                     },
                     now.getYear(), now.getMonthOfYear(), now.getDayOfMonth())
                     .show();
@@ -186,8 +184,8 @@ public class EditFilterPage extends Fragment implements
             new DatePickerDialog(v.getContext(),
                     (DatePicker view, int year, int month, int dayOfMonth) -> {
                         LocalDate d = new LocalDate(year, month, dayOfMonth);
-                        mFilter.setViewedTo(ISO8601_DATE_FORMAT.format(d.toDate()));
-                        mViewedTo.setText(HUMAN_READABLE_DATE_FORMAT.format(d.toDate()));
+                        mFilter.setViewedTo(ISO8601_DATE_FORMAT.print(d));
+                        mViewedTo.setText(HUMAN_READABLE_DATE_FORMAT.print(d));
                     },
                     now.getYear(), now.getMonthOfYear(), now.getDayOfMonth())
                     .show();
@@ -215,29 +213,25 @@ public class EditFilterPage extends Fragment implements
     public void initFromFilter(Filter filter) {
         mNameEditText.setText(filter.getName());
         ColorsHelper.updateSquares(getContext(), mColorSquares, filter.getColor());
-        try {
-            mCreatedFrom.setText(toHumanReadableString(filter.getCreatedFrom()));
-            mCreatedFrom.setVisibility(View.VISIBLE);
-            mCreatedTo.setText(toHumanReadableString(filter.getCreatedTo()));
-            mCreatedTo.setVisibility(View.VISIBLE);
-            mEditedFrom.setText(toHumanReadableString(filter.getEditedFrom()));
-            mEditedFrom.setVisibility(View.VISIBLE);
-            mEditedTo.setText(toHumanReadableString(filter.getEditedTo()));
-            mEditedTo.setVisibility(View.VISIBLE);
-            mViewedFrom.setText(toHumanReadableString(filter.getViewedFrom()));
-            mViewedFrom.setVisibility(View.VISIBLE);
-            mViewedTo.setText(toHumanReadableString(filter.getViewedTo()));
-            mViewedTo.setVisibility(View.VISIBLE);
-        } catch (ParseException e) {
-        }
+        mCreatedFrom.setText(toHumanReadableString(filter.getCreatedFrom()));
+        mCreatedFrom.setVisibility(View.VISIBLE);
+        mCreatedTo.setText(toHumanReadableString(filter.getCreatedTo()));
+        mCreatedTo.setVisibility(View.VISIBLE);
+        mEditedFrom.setText(toHumanReadableString(filter.getEditedFrom()));
+        mEditedFrom.setVisibility(View.VISIBLE);
+        mEditedTo.setText(toHumanReadableString(filter.getEditedTo()));
+        mEditedTo.setVisibility(View.VISIBLE);
+        mViewedFrom.setText(toHumanReadableString(filter.getViewedFrom()));
+        mViewedFrom.setVisibility(View.VISIBLE);
+        mViewedTo.setText(toHumanReadableString(filter.getViewedTo()));
+        mViewedTo.setVisibility(View.VISIBLE);
 
         mFilter = filter;
     }
 
-    private String toHumanReadableString(String iso8601)
-            throws ParseException {
+    private String toHumanReadableString(String iso8601) {
         if (iso8601 == null) return null;
-        Date date = ISO8601_DATE_FORMAT.parse(iso8601);
-        return HUMAN_READABLE_DATE_FORMAT.format(date);
+        DateTime date = new DateTime(iso8601);
+        return HUMAN_READABLE_DATE_FORMAT.print(date);
     }
 }
