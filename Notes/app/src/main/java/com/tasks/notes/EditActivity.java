@@ -161,7 +161,7 @@ public class EditActivity extends AppCompatActivity implements SquareFactory {
     @OnClick(R.id.edit_exit)
     protected void exit() {
         if (!mIsNewNote)
-            mDatabaseHelper.refreshViewedDate(mNote.getId(),
+            mDatabaseHelper.refreshViewedDateAsync(mNote.getId(),
                     ISO8601_DATE_FORMAT.print(new DateTime()));
 
         setResult(RESULT_CANCELED);
@@ -204,13 +204,13 @@ public class EditActivity extends AppCompatActivity implements SquareFactory {
         mNote.setViewed(now);
 
         if (mIsNewNote) {
-            mDatabaseHelper.insert(mNote);
+            mDatabaseHelper.insertAsync(mNote);
         } else {
-            mDatabaseHelper.replace(mNote.getId(), mNote);
+            mDatabaseHelper.replaceAsync(mNote.getId(), mNote);
         }
     }
 
     private void deleteNote() {
-        mDatabaseHelper.delete(mNote.getId());
+        mDatabaseHelper.deleteAsync(mNote.getId());
     }
 }

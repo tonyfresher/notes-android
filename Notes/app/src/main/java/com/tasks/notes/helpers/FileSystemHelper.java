@@ -4,17 +4,20 @@ package com.tasks.notes.helpers;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.tasks.notes.classes.Filter;
 import com.tasks.notes.classes.Note;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,14 +53,33 @@ public class FileSystemHelper {
 
             insertion:
             for (Note that : notesToImport) {
-                for (Note other: notesInDb) {
+                for (Note other : notesInDb) {
                     if (that.contentEquals(other)) {
                         continue insertion;
                     }
                 }
-                dh.insert(that);
+                dh.insertAsync(that);
             }
         }
+    }
+
+    public AsyncTask<Object, Integer, Void> importNotesAsync(Context context, @NonNull Uri uri) {
+        AsyncTask<Object, Integer, Void> t = new AsyncTask<Object, Integer, Void>() {
+            @Override
+            protected Void doInBackground(Object... params) {
+                final Context context = (Context) params[0];
+                final Uri uri = (Uri) params[1];
+
+                try {
+                    importNotes(context, uri);
+                } catch (IllegalAccessException | IOException | JsonParseException e) {
+                    cancel(true);
+                }
+                return null;
+            }
+        };
+
+        return t.execute(context, uri);
     }
 
     public static String exportNotes(Note[] notes)

@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -30,6 +31,7 @@ import com.google.gson.JsonParseException;
 import com.tasks.notes.adapters.NotesAdapter;
 import com.tasks.notes.classes.Filter;
 import com.tasks.notes.classes.Note;
+import com.tasks.notes.helpers.AsyncHelper;
 import com.tasks.notes.helpers.DatabaseHelper;
 import com.tasks.notes.helpers.FileSystemHelper;
 
@@ -92,8 +94,12 @@ public class ListActivity extends AppCompatActivity {
                 mBottomSheet.dismissSheet();
             }
 
-            Note[] notes = mDatabaseHelper.getOrderedItems(mDataComparator);
-            refreshList(notes);
+            AsyncHelper.Task<Comparator<Note>, Note[]> get = mDatabaseHelper.getOrderedItemsTask();
+            get.setOnPostExecute(result -> {
+                refreshList(result);
+                return null;
+            });
+            get.execute(mDataComparator);
 
             showFloatingButton();
             return true;
@@ -107,8 +113,13 @@ public class ListActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if (!mAreNotesFiltered) {
-            refreshList(mDatabaseHelper.getOrderedItems(mDataComparator));
-            setAddFloatingButton();
+            AsyncHelper.Task<Comparator<Note>, Note[]> get = mDatabaseHelper.getOrderedItemsTask();
+            get.setOnPostExecute(result -> {
+                refreshList(result);
+                setAddFloatingButton();
+                return null;
+            });
+            get.execute(mDataComparator);
         }
         mAreNotesFiltered = false;
     }
@@ -141,7 +152,12 @@ public class ListActivity extends AppCompatActivity {
             @Override
             public boolean onQueryTextChange(String newText) {
                 if (!newText.isEmpty()) {
-                    refreshList(mDatabaseHelper.searchBySubstring(newText));
+                    AsyncHelper.Task<String, Note[]> search = mDatabaseHelper.searchBySubstringTask();
+                    search.setOnPostExecute(result -> {
+                        refreshList(result);
+                        return null;
+                    });
+                    search.execute(newText);
                 }
                 return true;
             }
@@ -190,22 +206,31 @@ public class ListActivity extends AppCompatActivity {
                 return;
             case RESULT_FILTER:
                 if (resultCode == Activity.RESULT_OK && resultData != null) {
-                    Filter filter = resultData.getExtras().getParcelable(Filter.INTENT_EXTRA);
+                    Filter resultFilter = resultData.getExtras().getParcelable(Filter.INTENT_EXTRA);
 
-                    Note[] notes = mDatabaseHelper.getOrderedItems(mDataComparator);
-                    List<Note> filtered = new ArrayList<>();
+                    AsyncHelper.Task<Object, Note[]> task =
+                            AsyncHelper.getInstance().new Task<>(params -> {
+                                Filter filter = (Filter) params[0];
+                                Comparator<Note> comparator = (Comparator<Note>) params[1];
+                                Note[] notes = mDatabaseHelper.getOrderedItems(comparator);
+                                List<Note> filtered = new ArrayList<>();
 
-                    for (Note n : notes) {
-                        if (filter.check(n)) {
-                            filtered.add(n);
-                        }
-                    }
+                                for (Note n : notes) {
+                                    if (filter.check(n)) {
+                                        filtered.add(n);
+                                    }
+                                }
+                                return filtered.toArray(new Note[filtered.size()]);
+                            });
 
-                    setRefreshFloatingButton();
+                    task.setOnPostExecute(result -> {
+                        setRefreshFloatingButton();
+                        refreshList(result);
+                        mAreNotesFiltered = true;
+                        return null;
+                    });
 
-                    refreshList(
-                            filtered.toArray(new Note[filtered.size()]));
-                    mAreNotesFiltered = true;
+                    task.execute(resultFilter, mDataComparator);
                 }
                 return;
         }
@@ -229,15 +254,22 @@ public class ListActivity extends AppCompatActivity {
 
     private void tryExport() {
         if (isPermissionAllowed(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-            try {
-                String file =
-                        FileSystemHelper.exportNotes(mDatabaseHelper.getOrderedItems(mDataComparator));
-                showToast(getString(R.string.successfully_exported_to) + file, Toast.LENGTH_SHORT);
-            } catch (IllegalAccessException e) {
-                showErrorDialog(getString(R.string.cant_write));
-            } catch (IOException e) {
-                showErrorDialog(getString(R.string.wrong_file));
-            }
+            AsyncTask<Void, Integer, Void> export = new AsyncTask<Void, Integer, Void>() {
+                @Override
+                protected Void doInBackground(Void... params) {
+                    try {
+                        String file =
+                                FileSystemHelper.exportNotes(mDatabaseHelper.getOrderedItems(mDataComparator));
+                        showToast(getString(R.string.successfully_exported_to) + file, Toast.LENGTH_SHORT);
+                    } catch (IllegalAccessException e) {
+                        showErrorDialog(getString(R.string.cant_write));
+                    } catch (IOException e) {
+                        showErrorDialog(getString(R.string.wrong_file));
+                    }
+                    return null;
+                }
+            };
+            export.execute();
         } else {
             requestPermission(
                     Manifest.permission.WRITE_EXTERNAL_STORAGE, REQUEST_PERMISSION_WRITE);
@@ -255,8 +287,12 @@ public class ListActivity extends AppCompatActivity {
     }
 
     private void clearAll() {
-        mDatabaseHelper.dropTable();
-        onResume();
+        AsyncHelper.Task<Void, Void> task = mDatabaseHelper.dropTableTask();
+        task.setOnPostExecute(result -> {
+            onResume();
+            return null;
+        });
+        task.execute();
     }
 
     @Override
