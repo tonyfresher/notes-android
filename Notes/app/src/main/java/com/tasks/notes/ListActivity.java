@@ -2,7 +2,9 @@ package com.tasks.notes;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.NotificationManager;
 import android.app.SearchManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
@@ -12,6 +14,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AlertDialog;
@@ -31,9 +34,9 @@ import com.google.gson.JsonParseException;
 import com.tasks.notes.adapters.NotesAdapter;
 import com.tasks.notes.classes.Filter;
 import com.tasks.notes.classes.Note;
-import com.tasks.notes.helpers.AsyncHelper;
 import com.tasks.notes.helpers.DatabaseHelper;
 import com.tasks.notes.helpers.FileSystemHelper;
+import com.tasks.notes.helpers.HandyTask;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -94,7 +97,7 @@ public class ListActivity extends AppCompatActivity {
                 mBottomSheet.dismissSheet();
             }
 
-            AsyncHelper.Task<Comparator<Note>, Note[]> get = mDatabaseHelper.getOrderedItemsTask();
+            HandyTask<Comparator<Note>, Note[]> get = mDatabaseHelper.getOrderedItemsTask();
             get.setOnPostExecute(result -> {
                 refreshList(result);
                 return null;
@@ -113,7 +116,7 @@ public class ListActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if (!mAreNotesFiltered) {
-            AsyncHelper.Task<Comparator<Note>, Note[]> get = mDatabaseHelper.getOrderedItemsTask();
+            HandyTask<Comparator<Note>, Note[]> get = mDatabaseHelper.getOrderedItemsTask();
             get.setOnPostExecute(result -> {
                 refreshList(result);
                 setAddFloatingButton();
@@ -131,6 +134,7 @@ public class ListActivity extends AppCompatActivity {
             startActivity(intent);
         });
         mNotesList.setAdapter(adapter);
+
     }
 
     @Override
@@ -151,14 +155,13 @@ public class ListActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                if (!newText.isEmpty()) {
-                    AsyncHelper.Task<String, Note[]> search = mDatabaseHelper.searchBySubstringTask();
-                    search.setOnPostExecute(result -> {
-                        refreshList(result);
-                        return null;
-                    });
-                    search.execute(newText);
-                }
+                HandyTask<String, Note[]> search = mDatabaseHelper.searchBySubstringTask();
+                search.setOnPostExecute(result -> {
+                    refreshList(result);
+                    return null;
+                });
+                search.execute(newText);
+
                 return true;
             }
         });
@@ -208,8 +211,8 @@ public class ListActivity extends AppCompatActivity {
                 if (resultCode == Activity.RESULT_OK && resultData != null) {
                     Filter resultFilter = resultData.getExtras().getParcelable(Filter.INTENT_EXTRA);
 
-                    AsyncHelper.Task<Object, Note[]> task =
-                            AsyncHelper.getInstance().new Task<>(params -> {
+                    HandyTask<Object, Note[]> task =
+                            new HandyTask<>(params -> {
                                 Filter filter = (Filter) params[0];
                                 Comparator<Note> comparator = (Comparator<Note>) params[1];
                                 Note[] notes = mDatabaseHelper.getOrderedItems(comparator);
@@ -227,6 +230,7 @@ public class ListActivity extends AppCompatActivity {
                         setRefreshFloatingButton();
                         refreshList(result);
                         mAreNotesFiltered = true;
+                        onResume();
                         return null;
                     });
 
@@ -287,7 +291,7 @@ public class ListActivity extends AppCompatActivity {
     }
 
     private void clearAll() {
-        AsyncHelper.Task<Void, Void> task = mDatabaseHelper.dropTableTask();
+        HandyTask<Void, Void> task = mDatabaseHelper.dropTableTask();
         task.setOnPostExecute(result -> {
             onResume();
             return null;

@@ -61,8 +61,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    public AsyncHelper.Task<Void, Void> dropTableTask() {
-        return AsyncHelper.getInstance().new Task<>(params -> {
+    public HandyTask<Void, Void> dropTableTask() {
+        return new HandyTask(params -> {
             dropTable();
             return null;
         });
@@ -81,8 +81,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    public AsyncHelper.Task<Note, Void> insertTask() {
-        return AsyncHelper.getInstance().new Task<>(params -> {
+    public HandyTask<Note, Void> insertTask() {
+        return new HandyTask<>(params -> {
             final Note note = params[0];
             insert(note);
             return null;
@@ -104,8 +104,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    public AsyncHelper.Task<Object, Void> replaceTask() {
-        return AsyncHelper.getInstance().new Task<>(params -> {
+    public HandyTask<Object, Void> replaceTask() {
+        return new HandyTask<>(params -> {
             final long row = (long) params[0];
             final Note note = (Note) params[1];
             replace(row, note);
@@ -124,8 +124,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    public AsyncHelper.Task<Long, Void> deleteTask() {
-        return AsyncHelper.getInstance().new Task<>(params -> {
+    public HandyTask<Long, Void> deleteTask() {
+        return new HandyTask<>(params -> {
             final long row = params[0];
             delete(row);
             return null;
@@ -144,8 +144,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    public AsyncHelper.Task<Object, Void> refreshViewedDateTask() {
-        return AsyncHelper.getInstance().new Task<>(params -> {
+    public HandyTask<Object, Void> refreshViewedDateTask() {
+        return new HandyTask<>(params -> {
             final long row = (long) params[0];
             final String visited = (String) params[1];
             refreshViewedDate(row, visited);
@@ -204,8 +204,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return items;
     }
 
-    public AsyncHelper.Task<Comparator<Note>, Note[]> getOrderedItemsTask() {
-        return AsyncHelper.getInstance().new Task<>(params -> {
+    public HandyTask<Comparator<Note>, Note[]> getOrderedItemsTask() {
+        return new HandyTask<>(params -> {
             Comparator<Note> comparator = params[0];
             return getOrderedItems(comparator);
         });
@@ -221,15 +221,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 new String[]{"%" + substring + "%", "%" + substring + "%"});
     }
 
-    public AsyncHelper.Task<String, Note[]> searchBySubstringTask() {
-        return AsyncHelper.getInstance().new Task<>(params -> {
+    public HandyTask<String, Note[]> searchBySubstringTask() {
+        return new HandyTask<>(params -> {
             String substring = params[0];
             return searchBySubstring(substring);
         });
     }
 
     public AsyncTask<String, Integer, Note[]> searchBySubstringAsync() {
-        return AsyncHelper.getInstance().new Task<>(params -> {
+        return new HandyTask<>(params -> {
             String substring = params[0];
             return searchBySubstring(substring);
         });
