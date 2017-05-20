@@ -20,19 +20,19 @@ public class HandyTask<TArgs, TResult>
 
 
     public HandyTask(ParametrisedRunnable<TArgs[], TResult> doInBackground) {
-        this.mDoInBackground = doInBackground;
+        mDoInBackground = doInBackground;
     }
 
     public void setOnPreExecute(ParametrisedRunnable<Void, Void> onPreExecute) {
-        this.mOnPreExecute = onPreExecute;
+        mOnPreExecute = onPreExecute;
     }
 
     public void setOnPostExecute(ParametrisedRunnable<TResult, Void> onPostExecute) {
-        this.mOnPostExecute = onPostExecute;
+        mOnPostExecute = onPostExecute;
     }
 
     public void setOnProgressUpdate(ParametrisedRunnable<Integer[], Void> onProgressUpdate) {
-        this.mOnProgressUpdate = onProgressUpdate;
+        mOnProgressUpdate = onProgressUpdate;
     }
 
     @Override

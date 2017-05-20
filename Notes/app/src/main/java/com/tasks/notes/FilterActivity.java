@@ -26,8 +26,8 @@ import butterknife.ButterKnife;
 import static com.tasks.notes.helpers.FileSystemHelper.GSON_SERIALIZER;
 
 public class FilterActivity extends AppCompatActivity {
-    private SavedFiltersPage mSavedFiltersPage;
-    private EditFilterPage mEditFilterPage;
+    private SavedFiltersFragment mSavedFiltersFragment;
+    private EditFilterFragment mEditFilterFragment;
 
     @BindView(R.id.tabs)
     TabLayout mTabLayout;
@@ -56,38 +56,12 @@ public class FilterActivity extends AppCompatActivity {
 
         mTabLayout.setupWithViewPager(mViewPager);
 
-        mSavedFiltersPage = new SavedFiltersPage();
-        mEditFilterPage = new EditFilterPage();
+        mSavedFiltersFragment = new SavedFiltersFragment();
+        mEditFilterFragment = new EditFilterFragment();
     }
 
     public void refreshSavedList() {
-        Filter[] filters = getFiltersFromPrefs();
-        mSavedFiltersPage.refreshList(filters);
-    }
-
-    public void saveFilterToPrefs(Filter filter) {
-        String json = GSON_SERIALIZER.toJson(filter);
-        SharedPreferences sharedPref = getPreferences(MODE_PRIVATE);
-        sharedPref.edit()
-                .putString(filter.getName(), json)
-                .apply();
-    }
-
-    public Filter[] getFiltersFromPrefs() {
-        Map<String, ?> fromPrefs = getPreferences(MODE_PRIVATE).getAll();
-        List<Filter> filters = new ArrayList<>();
-        for (Map.Entry entry : fromPrefs.entrySet()) {
-            if (entry.getValue() instanceof String) {
-                String json = (String) entry.getValue();
-                try {
-                    Filter f = GSON_SERIALIZER.fromJson(json, Filter.class);
-                    filters.add(f);
-                } catch (JsonParseException e) {
-                }
-            }
-        }
-
-        return filters.toArray(new Filter[filters.size()]);
+        mSavedFiltersFragment.refreshList();
     }
 
     public void exitWithResult(Filter result) {
@@ -99,7 +73,7 @@ public class FilterActivity extends AppCompatActivity {
 
     public void setFilter(Filter filter) {
         mViewPager.setCurrentItem(1);
-        mEditFilterPage.initFromFilter(filter);
+        mEditFilterFragment.initFromFilter(filter);
     }
 
     public class FilterPagerAdapter extends FragmentPagerAdapter {
@@ -112,9 +86,9 @@ public class FilterActivity extends AppCompatActivity {
         public Fragment getItem(int position) {
             switch (position) {
                 case 0:
-                    return mSavedFiltersPage;
+                    return mSavedFiltersFragment;
                 case 1:
-                    return mEditFilterPage;
+                    return mEditFilterFragment;
             }
             return null;
         }

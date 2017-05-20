@@ -24,7 +24,7 @@ import org.joda.time.DateTime;
 
 import static com.tasks.notes.helpers.DateHelper.ISO8601_DATE_FORMAT;
 
-public class Note implements Serializable, Parcelable {
+public class Note implements Parcelable, Serializable {
     public final static String INTENT_EXTRA = "note";
 
     private long id;

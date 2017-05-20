@@ -2,35 +2,31 @@ package com.tasks.notes;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.NotificationManager;
-import android.app.SearchManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.ColorStateList;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import com.flipboard.bottomsheet.BottomSheetLayout;
 import com.flipboard.bottomsheet.commons.MenuSheetView;
-import com.google.gson.JsonParseException;
 import com.tasks.notes.adapters.NotesAdapter;
 import com.tasks.notes.classes.Filter;
 import com.tasks.notes.classes.Note;
@@ -38,7 +34,6 @@ import com.tasks.notes.helpers.DatabaseHelper;
 import com.tasks.notes.helpers.FileSystemHelper;
 import com.tasks.notes.helpers.HandyTask;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -47,38 +42,45 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class ListActivity extends AppCompatActivity {
+public class ListFragment extends Fragment {
+
+    public static ListFragment newInstance() {
+        Bundle args = new Bundle();
+        ListFragment fragment = new ListFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     private static final int REQUEST_PERMISSION_READ = 1;
     private static final int REQUEST_PERMISSION_WRITE = 2;
     private static final int RESULT_FILE_TO_READ = 42;
     private static final int RESULT_FILTER = 24;
 
-    private final DatabaseHelper mDatabaseHelper = new DatabaseHelper(this);
     private Comparator<Note> mDataComparator = Note.BY_CREATED_DESCENDING_COMPARATOR;
-    private boolean mAreNotesFiltered = false;
 
     @BindView(R.id.list_notes)
-    RecyclerView mNotesList;
-    @BindView(R.id.list_floating_button)
-    FloatingActionButton mFloatingButton;
+    RecyclerView mNotesRecyclerView;
+    @BindView(R.id.list_add_floating_button)
+    FloatingActionButton mAddFloatingButton;
     @BindView(R.id.bottom_sheet_sort)
     BottomSheetLayout mBottomSheet;
     MenuSheetView mMenuSheetView;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_list);
-        ButterKnife.bind(this);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle
+            savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.fragment_list, container, false);
+        ButterKnife.bind(this, rootView);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.list_toolbar);
-        setSupportActionBar(toolbar);
+        Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.list_toolbar);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
 
-        mNotesList.setLayoutManager(new LinearLayoutManager(this));
+        setHasOptionsMenu(true);
+
+        mNotesRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         mMenuSheetView = new MenuSheetView(
-                this, MenuSheetView.MenuType.LIST, "Sort...", item -> {
+                getContext(), MenuSheetView.MenuType.LIST, "Sort...", item -> {
             switch (item.getItemId()) {
                 case R.id.bottom_sheet_sort_by_name:
                     mDataComparator = Note.BY_NAME_COMPARATOR;
@@ -97,7 +99,7 @@ public class ListActivity extends AppCompatActivity {
                 mBottomSheet.dismissSheet();
             }
 
-            HandyTask<Comparator<Note>, Note[]> get = mDatabaseHelper.getOrderedItemsTask();
+            HandyTask<Comparator<Note>, List<Note>> get = getDatabaseHelper().getOrderedItemsTask();
             get.setOnPostExecute(result -> {
                 refreshList(result);
                 return null;
@@ -107,91 +109,83 @@ public class ListActivity extends AppCompatActivity {
             showFloatingButton();
             return true;
         });
-        mMenuSheetView.inflateMenu(R.menu.bottom_sheet_sort);
+        mMenuSheetView.inflateMenu(R.menu.menu_sort_bottom_sheet);
 
-        setAddFloatingButton();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (!mAreNotesFiltered) {
-            HandyTask<Comparator<Note>, Note[]> get = mDatabaseHelper.getOrderedItemsTask();
-            get.setOnPostExecute(result -> {
-                refreshList(result);
-                setAddFloatingButton();
-                return null;
-            });
-            get.execute(mDataComparator);
-        }
-        mAreNotesFiltered = false;
-    }
-
-    private void refreshList(final Note[] notes) {
-        NotesAdapter adapter = new NotesAdapter(notes, (v, position) -> {
+        mAddFloatingButton.setOnClickListener(v -> {
             Intent intent = new Intent(v.getContext(), EditActivity.class);
-            intent.putExtra(Note.INTENT_EXTRA, (Serializable) notes[position]);
             startActivity(intent);
         });
-        mNotesList.setAdapter(adapter);
 
+        return rootView;
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.activity_list, menu);
-
-        SearchView searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.menu_search));
-
-        SearchManager searchManager = (SearchManager) getSystemService(SEARCH_SERVICE);
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                HandyTask<String, Note[]> search = mDatabaseHelper.searchBySubstringTask();
-                search.setOnPostExecute(result -> {
-                    refreshList(result);
-                    return null;
-                });
-                search.execute(newText);
-
-                return true;
-            }
+    public void onResume() {
+        super.onResume();
+        HandyTask<Comparator<Note>, List<Note>> get = getDatabaseHelper().getOrderedItemsTask();
+        get.setOnPostExecute(result -> {
+            refreshList(result);
+            hideKeyboard();
+            return null;
         });
+        get.execute(mDataComparator);
+    }
 
-        return true;
+    private void refreshList(List<Note> notes) {
+        NotesAdapter adapter = new NotesAdapter(notes, (v, position) -> {
+            Intent intent = new Intent(v.getContext(), EditActivity.class);
+            intent.putExtra(Note.INTENT_EXTRA, (Serializable) notes.get(position));
+            startActivity(intent);
+        });
+        mNotesRecyclerView.setAdapter(adapter);
+    }
+
+    private void hideKeyboard() {
+        Activity a = getActivity();
+        InputMethodManager imm = (InputMethodManager) a.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        View view = a.getCurrentFocus();
+        if (view == null) {
+            view = new View(a);
+        }
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_list, menu);
+
+        MenuItem searchView = menu.findItem(R.id.list_menu_search);
+        searchView.setOnMenuItemClickListener(v -> {
+            getActivity().getSupportFragmentManager().beginTransaction()
+                    .add(R.id.main_fragment_container, FilteredFragment.newInstance())
+                    .addToBackStack(null)
+                    .commit();
+
+            return true;
+        });
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.menu_search:
-                return true;
-            case R.id.menu_sort:
+            case R.id.list_menu_sort:
                 hideFloatingButton();
                 mBottomSheet.showWithSheetView(mMenuSheetView);
                 return true;
-            case R.id.menu_filter:
-                Intent intent = new Intent(this, FilterActivity.class);
+            case R.id.list_menu_filter:
+                Intent intent = new Intent(getActivity(), FilterActivity.class);
                 startActivityForResult(intent, RESULT_FILTER);
                 return true;
-            case R.id.menu_import:
+            case R.id.list_menu_import:
                 requestImportFile();
                 return true;
-            case R.id.menu_export:
+            case R.id.list_menu_export:
                 tryExport();
                 return true;
-            case R.id.menu_create10000:
+            case R.id.list_menu_create10000:
                 insert100000();
                 return true;
-            case R.id.menu_clear_all:
+            case R.id.list_menu_clear_all:
                 clearAll();
                 return true;
             default:
@@ -200,7 +194,7 @@ public class ListActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent resultData) {
+    public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
         switch (requestCode) {
             case RESULT_FILE_TO_READ:
                 if (resultCode == Activity.RESULT_OK && resultData != null) {
@@ -211,11 +205,12 @@ public class ListActivity extends AppCompatActivity {
                 if (resultCode == Activity.RESULT_OK && resultData != null) {
                     Filter resultFilter = resultData.getExtras().getParcelable(Filter.INTENT_EXTRA);
 
-                    HandyTask<Object, Note[]> task =
+                    HandyTask<Object, List<Note>> task =
                             new HandyTask<>(params -> {
                                 Filter filter = (Filter) params[0];
                                 Comparator<Note> comparator = (Comparator<Note>) params[1];
-                                Note[] notes = mDatabaseHelper.getOrderedItems(comparator);
+
+                                List<Note> notes = getDatabaseHelper().getOrderedItems(comparator);
                                 List<Note> filtered = new ArrayList<>();
 
                                 for (Note n : notes) {
@@ -223,14 +218,16 @@ public class ListActivity extends AppCompatActivity {
                                         filtered.add(n);
                                     }
                                 }
-                                return filtered.toArray(new Note[filtered.size()]);
+
+                                return filtered;
                             });
 
                     task.setOnPostExecute(result -> {
-                        setRefreshFloatingButton();
-                        refreshList(result);
-                        mAreNotesFiltered = true;
-                        onResume();
+                        FilteredFragment fragment = FilteredFragment.newInstance(result);
+                        getActivity().getSupportFragmentManager().beginTransaction()
+                                .add(R.id.main_fragment_container, fragment)
+                                .addToBackStack(null)
+                                .commit();
                         return null;
                     });
 
@@ -238,18 +235,19 @@ public class ListActivity extends AppCompatActivity {
                 }
                 return;
         }
+
     }
 
     private void tryImport(Uri uri) {
         if (isPermissionAllowed(Manifest.permission.READ_EXTERNAL_STORAGE)) {
-            try {
-                FileSystemHelper.importNotes(this, uri);
-                showToast(getString(R.string.successfully_imported), Toast.LENGTH_SHORT);
-            } catch (IllegalAccessException e) {
-                showErrorDialog(getString(R.string.cant_read));
-            } catch (IOException | JsonParseException e) {
-                showErrorDialog(getString(R.string.wrong_file));
-            }
+            HandyTask<Object, String> task = FileSystemHelper.importNotesTask();
+
+            task.setOnPostExecute(result -> {
+                showToast(result, Toast.LENGTH_SHORT);
+                return null;
+            });
+
+            task.execute(getContext(), uri);
         } else {
             requestPermission(
                     Manifest.permission.READ_EXTERNAL_STORAGE, REQUEST_PERMISSION_READ);
@@ -258,22 +256,20 @@ public class ListActivity extends AppCompatActivity {
 
     private void tryExport() {
         if (isPermissionAllowed(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-            AsyncTask<Void, Integer, Void> export = new AsyncTask<Void, Integer, Void>() {
-                @Override
-                protected Void doInBackground(Void... params) {
-                    try {
-                        String file =
-                                FileSystemHelper.exportNotes(mDatabaseHelper.getOrderedItems(mDataComparator));
-                        showToast(getString(R.string.successfully_exported_to) + file, Toast.LENGTH_SHORT);
-                    } catch (IllegalAccessException e) {
-                        showErrorDialog(getString(R.string.cant_write));
-                    } catch (IOException e) {
-                        showErrorDialog(getString(R.string.wrong_file));
-                    }
+            HandyTask<Comparator<Note>, List<Note>> get = getDatabaseHelper().getOrderedItemsTask();
+
+            get.setOnPostExecute(result -> {
+                HandyTask<Object, String> export = FileSystemHelper.exportNotesTask();
+                export.setOnPostExecute(status -> {
+                    showToast(status, Toast.LENGTH_SHORT);
                     return null;
-                }
-            };
-            export.execute();
+                });
+
+                export.execute(getContext(), result);
+                return null;
+            });
+
+            get.execute(mDataComparator);
         } else {
             requestPermission(
                     Manifest.permission.WRITE_EXTERNAL_STORAGE, REQUEST_PERMISSION_WRITE);
@@ -291,12 +287,16 @@ public class ListActivity extends AppCompatActivity {
     }
 
     private void clearAll() {
-        HandyTask<Void, Void> task = mDatabaseHelper.dropTableTask();
+        HandyTask<Void, Void> task = getDatabaseHelper().dropTableTask();
         task.setOnPostExecute(result -> {
             onResume();
             return null;
         });
         task.execute();
+    }
+
+    public DatabaseHelper getDatabaseHelper() {
+        return ((MainActivity) getActivity()).getDatabaseHelper();
     }
 
     @Override
@@ -325,54 +325,32 @@ public class ListActivity extends AppCompatActivity {
     }
 
     private boolean isPermissionAllowed(String permission) {
-        return ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED;
+        return ContextCompat.checkSelfPermission(getContext(), permission) == PackageManager.PERMISSION_GRANTED;
     }
 
     private void requestPermission(String permission, int request) {
-        ActivityCompat.requestPermissions(this, new String[]{permission}, request);
-    }
-
-    private void setAddFloatingButton() {
-        mFloatingButton.setBackgroundTintList(ColorStateList.valueOf(
-                ContextCompat.getColor(this, R.color.colorAccent)));
-        mFloatingButton.setImageDrawable(
-                getDrawable(R.drawable.ic_add_white_24dp));
-        mFloatingButton.setOnClickListener(v -> {
-            Intent intent = new Intent(v.getContext(), EditActivity.class);
-            startActivity(intent);
-        });
-    }
-
-    private void setRefreshFloatingButton() {
-        mFloatingButton.setBackgroundTintList(ColorStateList.valueOf(
-                ContextCompat.getColor(this, R.color.red)));
-        mFloatingButton.setImageDrawable(
-                getDrawable(R.drawable.ic_close_white_24dp));
-        mFloatingButton.setOnClickListener(v -> {
-            setAddFloatingButton();
-            onResume();
-        });
+        ActivityCompat.requestPermissions(getActivity(), new String[]{permission}, request);
     }
 
     private void showFloatingButton() {
-        mFloatingButton.animate()
+        mAddFloatingButton.animate()
                 .scaleX(1).scaleY(1).setDuration(300)
                 .start();
     }
 
     private void hideFloatingButton() {
-        mFloatingButton.animate()
+        mAddFloatingButton.animate()
                 .scaleX(0).scaleY(0).setDuration(150)
                 .start();
     }
 
     private void showToast(String message, int length) {
-        Toast.makeText(this, message, length).show();
+        Toast.makeText(getContext(), message, length).show();
     }
 
     private void showErrorDialog(String message) {
         String error = getString(R.string.error);
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle(error)
                 .setMessage(message)
                 .setPositiveButton("OK", null);

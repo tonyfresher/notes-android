@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.tasks.notes.ListActivity">
+    android:clickable="true"
+    tools:context="com.tasks.notes.ListFragment">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -35,11 +36,12 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/list_floating_button"
+        android:id="@+id/list_add_floating_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/fab_margin" />
+        android:layout_margin="@dimen/fab_margin"
+        app:srcCompat="@drawable/ic_add_white_24dp" />
 
     <com.flipboard.bottomsheet.BottomSheetLayout
         android:id="@+id/bottom_sheet_sort"

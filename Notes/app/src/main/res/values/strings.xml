@@ -12,7 +12,8 @@
     <string name="note_saved">Note saved</string>
     <string name="note_deleted">Note deleted</string>
 
-    <string name="search">Search</string>
+    <string name="search_hint">Search</string>
+    <string name="back">Back</string>
     <string name="sort">Sort</string>
     <string name="filter">Filter</string>
     <string name="importFile">Import</string>

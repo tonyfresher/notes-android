@@ -11,8 +11,9 @@ import android.support.annotation.NonNull;
 import com.tasks.notes.classes.Note;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private final static String TABLE_NAME = "Notes";
@@ -54,7 +55,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
-    private void dropTable() {
+    public synchronized void dropTable() {
         try (SQLiteDatabase db = this.getWritableDatabase()) {
             db.execSQL(DROP_TABLE_QUERY);
             db.execSQL(CREATE_TABLE_QUERY);
@@ -73,7 +74,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
-    private void insert(Note note) {
+    public synchronized void insert(Note note) {
         ContentValues values = getContentValuesFromNote(note);
 
         try (SQLiteDatabase db = this.getWritableDatabase()) {
@@ -94,7 +95,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
-    private void replace(long row, Note note) {
+    public synchronized void replace(long row, Note note) {
         ContentValues values = getContentValuesFromNote(note);
 
         try (SQLiteDatabase db = this.getWritableDatabase()) {
@@ -118,7 +119,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
-    private void delete(long row) {
+    public synchronized void delete(long row) {
         try (SQLiteDatabase db = this.getWritableDatabase()) {
             db.delete(TABLE_NAME, String.format("%s=%s", NOTE_ROWID, row), null);
         }
@@ -137,7 +138,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
-    private void refreshViewedDate(long row, String visited) {
+    public synchronized void refreshViewedDate(long row, String visited) {
         try (SQLiteDatabase db = this.getWritableDatabase()) {
             db.execSQL(UPDATE_VIEWED_WHERE_ROWID_QUERY,
                     new String[]{visited, Long.toString(row)});
@@ -158,8 +159,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
-    private Note[] getItems(String query, String[] args) {
-        ArrayList<Note> notes = new ArrayList<>();
+    private synchronized List<Note> getItems(String query, String[] args) {
+        List<Note> notes = new ArrayList<>();
 
         try (SQLiteDatabase db = this.getWritableDatabase()) {
             Cursor c = db.rawQuery(query, args);
@@ -193,42 +194,41 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             c.close();
         }
 
-        Note[] notesArray = new Note[notes.size()];
-        return notes.toArray(notesArray);
+        return notes;
     }
 
 
-    public Note[] getOrderedItems(@NonNull Comparator<Note> comparator) {
-        Note[] items = getItems(SELECT_ALL_QUERY, null);
-        Arrays.sort(items, comparator);
+    public List<Note> getOrderedItems(@NonNull Comparator<Note> comparator) {
+        List<Note> items = getItems(SELECT_ALL_QUERY, null);
+        Collections.sort(items, comparator);
         return items;
     }
 
-    public HandyTask<Comparator<Note>, Note[]> getOrderedItemsTask() {
+    public HandyTask<Comparator<Note>, List<Note>> getOrderedItemsTask() {
         return new HandyTask<>(params -> {
             Comparator<Note> comparator = params[0];
             return getOrderedItems(comparator);
         });
     }
 
-    public AsyncTask<Comparator<Note>, Integer, Note[]> getOrderedItemsAsync(@NonNull Comparator<Note> comparator) {
+    public AsyncTask<Comparator<Note>, Integer, List<Note>> getOrderedItemsAsync(@NonNull Comparator<Note> comparator) {
         return getOrderedItemsTask().execute(comparator);
     }
 
 
-    public Note[] searchBySubstring(String substring) {
+    public synchronized List<Note> searchBySubstring(String substring) {
         return getItems(SEARCH_SUBSTRING,
                 new String[]{"%" + substring + "%", "%" + substring + "%"});
     }
 
-    public HandyTask<String, Note[]> searchBySubstringTask() {
+    public HandyTask<String, List<Note>> searchBySubstringTask() {
         return new HandyTask<>(params -> {
             String substring = params[0];
             return searchBySubstring(substring);
         });
     }
 
-    public AsyncTask<String, Integer, Note[]> searchBySubstringAsync() {
+    public AsyncTask<String, Integer, List<Note>> searchBySubstringAsync() {
         return new HandyTask<>(params -> {
             String substring = params[0];
             return searchBySubstring(substring);

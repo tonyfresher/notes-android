@@ -1,6 +1,8 @@
 package com.tasks.notes;
 
 import android.app.DatePickerDialog;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -25,8 +27,9 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static com.tasks.notes.helpers.DateHelper.*;
+import static com.tasks.notes.helpers.FileSystemHelper.GSON_SERIALIZER;
 
-public class EditFilterPage extends Fragment implements
+public class EditFilterFragment extends Fragment implements
         ColorsHelper.SquareFactory {
     private Filter mFilter = new Filter();
 
@@ -63,7 +66,7 @@ public class EditFilterPage extends Fragment implements
     @BindView(R.id.filter_apply_button)
     Button mApplyButton;
 
-    public EditFilterPage() {
+    public EditFilterFragment() {
     }
 
     @Override
@@ -92,7 +95,7 @@ public class EditFilterPage extends Fragment implements
             }
 
             mFilter.setName(name);
-            context.saveFilterToPrefs(mFilter);
+            saveFilterToPrefs(mFilter);
             context.refreshSavedList();
             Toast.makeText(context, getString(R.string.filter_was_saved), Toast.LENGTH_SHORT)
                     .show();
@@ -227,6 +230,14 @@ public class EditFilterPage extends Fragment implements
         mViewedTo.setVisibility(View.VISIBLE);
 
         mFilter = filter;
+    }
+
+    public void saveFilterToPrefs(Filter filter) {
+        String json = GSON_SERIALIZER.toJson(filter);
+        SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+        sharedPref.edit()
+                .putString(filter.getName(), json)
+                .apply();
     }
 
     private String toHumanReadableString(String iso8601) {

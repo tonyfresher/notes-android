@@ -11,15 +11,17 @@ import android.widget.TextView;
 import com.tasks.notes.classes.Note;
 import com.tasks.notes.R;
 
+import java.util.List;
+
 public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.ViewHolder> {
     public interface OnItemClickListener {
         void onItemClick(View v, int position);
     }
 
     private static OnItemClickListener mListener;
-    private Note[] mData;
+    private final List<Note> mData;
 
-    public NotesAdapter(Note[] objects, OnItemClickListener listener) {
+    public NotesAdapter(List<Note> objects, OnItemClickListener listener) {
         mData = objects;
         mListener = listener;
     }
@@ -27,25 +29,26 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.ViewHolder> 
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.note_item, parent, false);
+                .inflate(R.layout.item_note, parent, false);
         return new ViewHolder(v);
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.title.setText(mData[position].getTitle());
-        holder.description.setText(mData[position].getDescription());
-        holder.container.setBackgroundColor(mData[position].getColor());
-        holder.title.setVisibility("".equals(mData[position].getTitle()) ?
+        holder.title.setText(mData.get(position).getTitle());
+        holder.description.setText(mData.get(position).getDescription());
+        holder.container.setBackgroundColor(mData.get(position).getColor());
+        holder.title.setVisibility("".equals(mData.get(position).getTitle()) ?
                 View.GONE : View.VISIBLE);
-        holder.description.setVisibility("".equals(mData[position].getDescription()) ?
+        holder.description.setVisibility("".equals(mData.get(position).getDescription()) ?
                 View.GONE : View.VISIBLE);
     }
 
     @Override
     public int getItemCount() {
-        return mData.length;
+        return mData.size();
     }
+
 
     protected static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView title;

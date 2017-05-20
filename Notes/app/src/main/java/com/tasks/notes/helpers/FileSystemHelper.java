@@ -5,19 +5,23 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
+import android.os.Message;
 import android.support.annotation.NonNull;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import com.tasks.notes.R;
 import com.tasks.notes.classes.Filter;
 import com.tasks.notes.classes.Note;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,6 +29,7 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 
 public class FileSystemHelper {
     public final static Gson GSON_SERIALIZER = new GsonBuilder()
@@ -32,7 +37,7 @@ public class FileSystemHelper {
             .registerTypeAdapter(Filter.class, new Filter.Serializer())
             .create();
     public final static String FILE_NAME = "itemlist.ili";
-
+    
 
     public static void importNotes(Context context, @NonNull Uri uri)
             throws IllegalAccessException, IOException, JsonParseException {
@@ -49,7 +54,7 @@ public class FileSystemHelper {
             Note[] notesToImport = jsonToNotes(input);
             Arrays.sort(notesToImport, comparator);
 
-            Note[] notesInDb = dh.getOrderedItems(comparator);
+            List<Note> notesInDb = dh.getOrderedItems(comparator);
 
             insertion:
             for (Note that : notesToImport) {
@@ -58,31 +63,33 @@ public class FileSystemHelper {
                         continue insertion;
                     }
                 }
-                dh.insertAsync(that);
+                dh.insert(that);
             }
         }
     }
 
-    public AsyncTask<Object, Integer, Void> importNotesAsync(Context context, @NonNull Uri uri) {
-        AsyncTask<Object, Integer, Void> t = new AsyncTask<Object, Integer, Void>() {
-            @Override
-            protected Void doInBackground(Object... params) {
-                final Context context = (Context) params[0];
-                final Uri uri = (Uri) params[1];
+    public static HandyTask<Object, String> importNotesTask() {
+        return new HandyTask<>(params -> {
+            final Context context = (Context) params[0];
+            final Uri uri = (Uri) params[1];
 
-                try {
-                    importNotes(context, uri);
-                } catch (IllegalAccessException | IOException | JsonParseException e) {
-                    cancel(true);
-                }
-                return null;
+            try {
+                importNotes(context, uri);
+                return context.getString(R.string.successfully_imported);
+            } catch (IllegalAccessException e) {
+                return context.getString(R.string.cant_read);
+            } catch (IOException | JsonParseException e) {
+                return context.getString(R.string.wrong_file);
             }
-        };
-
-        return t.execute(context, uri);
+        });
     }
 
-    public static String exportNotes(Note[] notes)
+    public static AsyncTask<Object, Integer, String> importNotesAsync(Context context, @NonNull Uri uri) {
+        return importNotesTask().execute(context, uri);
+    }
+
+
+    public static String exportNotes(List<Note> notes)
             throws IllegalAccessException, IOException {
         if (!isExternalStorageWritable()) {
             throw new IllegalAccessException();
@@ -101,6 +108,27 @@ public class FileSystemHelper {
         return file.getCanonicalPath();
     }
 
+    public static HandyTask<Object, String> exportNotesTask() {
+        return new HandyTask<>(params -> {
+            Context context = (Context) params[0];
+            List<Note> notes = (List<Note>) params[1];
+
+            try {
+                exportNotes(notes);
+                return context.getString(R.string.successfully_imported);
+            } catch (IllegalAccessException e) {
+                return context.getString(R.string.cant_read);
+            } catch (IOException | JsonParseException e) {
+                return context.getString(R.string.wrong_file);
+            }
+        });
+    }
+
+    public static AsyncTask<Object, Integer, String> exportNotesAsync(Context context, List<Note> notes) {
+        return exportNotesTask().execute(context, notes);
+    }
+
+
     public static boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
         return Environment.MEDIA_MOUNTED.equals(state);
@@ -111,6 +139,7 @@ public class FileSystemHelper {
         return Environment.MEDIA_MOUNTED.equals(state) ||
                 Environment.MEDIA_MOUNTED_READ_ONLY.equals(state);
     }
+
 
     public static String getInputContent(InputStream fis, String encoding)
             throws IOException {
@@ -124,7 +153,7 @@ public class FileSystemHelper {
         }
     }
 
-    public static String notesToJson(Note[] notes) {
+    public static String notesToJson(List<Note> notes) {
         return GSON_SERIALIZER.toJson(notes);
     }
 
