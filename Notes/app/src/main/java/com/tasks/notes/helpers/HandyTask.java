@@ -13,103 +13,105 @@ public class HandyTask<TArgs, TResult>
         TR run(TA params);
     }
 
-    private ParametrisedRunnable<Void, Void> mOnPreExecute;
-    private ParametrisedRunnable<TArgs[], TResult> mDoInBackground;
-    private ParametrisedRunnable<TResult, Void> mOnPostExecute;
-    private ParametrisedRunnable<Integer[], Void> mOnProgressUpdate;
+    public interface ParametrisedRunnableWithTask<TA, TR> {
+        TR run(HandyTask task, TA params);
+    }
 
+    private final ParametrisedRunnableWithTask<TArgs[], TResult> doInBackground;
+    private ParametrisedRunnable<Void, Void> onPreExecute;
+    private ParametrisedRunnable<TResult, Void> onPostExecute;
+    private ParametrisedRunnable<Integer[], Void> onProgressUpdate;
 
-    public HandyTask(ParametrisedRunnable<TArgs[], TResult> doInBackground) {
-        mDoInBackground = doInBackground;
+    public HandyTask(ParametrisedRunnableWithTask<TArgs[], TResult> doInBackground) {
+        this.doInBackground = doInBackground;
     }
 
     public void setOnPreExecute(ParametrisedRunnable<Void, Void> onPreExecute) {
-        mOnPreExecute = onPreExecute;
+        this.onPreExecute = onPreExecute;
     }
 
     public void setOnPostExecute(ParametrisedRunnable<TResult, Void> onPostExecute) {
-        mOnPostExecute = onPostExecute;
+        this.onPostExecute = onPostExecute;
     }
 
     public void setOnProgressUpdate(ParametrisedRunnable<Integer[], Void> onProgressUpdate) {
-        mOnProgressUpdate = onProgressUpdate;
+        this.onProgressUpdate = onProgressUpdate;
     }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        if (mOnPreExecute != null) {
-            mOnPreExecute.run(null);
+        if (onPreExecute != null) {
+            onPreExecute.run(null);
         }
-        if (mHasNotification) {
+        if (hasNotification) {
             startNotification();
         }
     }
 
     @Override
     protected TResult doInBackground(TArgs... params) {
-        return mDoInBackground.run(params);
+        return doInBackground.run(this, params);
     }
 
     @Override
     protected void onPostExecute(TResult tResult) {
         super.onPostExecute(tResult);
-        if (mOnPostExecute != null) {
-            mOnPostExecute.run(tResult);
+        if (onPostExecute != null) {
+            onPostExecute.run(tResult);
         }
-        if (mHasNotification) {
-            completeNotification();
+        if (hasNotification) {
+            closeNotification();
         }
     }
 
     @Override
     protected void onProgressUpdate(Integer... values) {
         super.onProgressUpdate(values);
-        if (mOnProgressUpdate != null) {
-            mOnProgressUpdate.run(values);
+        if (onProgressUpdate != null) {
+            onProgressUpdate.run(values);
         }
-        if (mHasNotification) {
+        if (hasNotification) {
             updateNotification(values[0]);
         }
     }
 
-    private boolean mHasNotification = false;
-    private Context mContext;
-    private NotificationCompat.Builder mBuilder;
-    private NotificationManager mNotificationManager;
-    private int mId;
-    private String mTitle;
+    private boolean hasNotification = false;
+    private Context context;
+    private NotificationCompat.Builder notifyBuilder;
+    private NotificationManager notifyManager;
+    private int notifyId;
+    private String notifyTitle;
+    private boolean indeterminate;
 
-    public void setNotification(Context context, int id, String title) {
-        mContext = context;
-        mId = id;
-        mTitle = title;
-        mHasNotification = true;
+    public void setNotification(Context context, int id, String title, boolean indeterminate) {
+        this.context = context;
+        this.notifyId = id;
+        this.notifyTitle = title;
+        this.indeterminate = indeterminate;
+        hasNotification = true;
     }
 
-    private void startNotification() {
-        mNotificationManager = (NotificationManager) mContext
+    public void startNotification() {
+        notifyManager = (NotificationManager) context
                 .getSystemService(Context.NOTIFICATION_SERVICE);
-        mBuilder = new NotificationCompat.Builder(mContext);
+        notifyBuilder = new NotificationCompat.Builder(context);
 
-        mBuilder.setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle(mTitle)
-                .setContentText(mContext.getString(R.string.performing));
+        notifyBuilder.setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle(notifyTitle)
+                .setContentText(context.getString(R.string.performing))
+                .setOngoing(true);
 
-        mBuilder.setProgress(100, 0, false);
-        mNotificationManager.notify(mId, mBuilder.build());
+        notifyBuilder.setProgress(100, 0, indeterminate);
+        notifyManager.notify(notifyId, notifyBuilder.build());
     }
 
-    private void updateNotification(int value) {
-        mBuilder.setProgress(100, value, false);
-        mNotificationManager.notify(mId, mBuilder.build());
+    public void updateNotification(int value) {
+        notifyBuilder.setProgress(100, value, false);
+        notifyManager.notify(notifyId, notifyBuilder.build());
     }
 
-    private void completeNotification() {
-        mBuilder.setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle(mTitle)
-                .setContentText(mContext.getString(R.string.completed));
-
-        mNotificationManager.notify(mId, mBuilder.build());
+    public void closeNotification() {
+        notifyManager.cancel(notifyId);
     }
 }

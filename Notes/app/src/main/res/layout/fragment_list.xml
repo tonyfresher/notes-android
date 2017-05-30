@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:clickable="true"
-    tools:context="com.tasks.notes.ListFragment">
+    android:clickable="true">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -32,6 +30,7 @@
         android:background="@color/colorBackground"
         android:clipToPadding="false"
         android:paddingTop="8dp"
+        android:paddingBottom="8dp"
         android:scrollbars="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 

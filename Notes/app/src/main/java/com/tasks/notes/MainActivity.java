@@ -1,49 +1,47 @@
 package com.tasks.notes;
 
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 
-import com.tasks.notes.helpers.DatabaseHelper;
-import com.tasks.notes.helpers.FileSystemHelper;
 
 public class MainActivity extends AppCompatActivity {
-
-    private DatabaseHelper mDatabaseHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mDatabaseHelper = new DatabaseHelper(this);
-
         if (savedInstanceState == null) {
-            ListFragment fragment = ListFragment.newInstance();
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.main_fragment_container, fragment)
-                    .addToBackStack(null)
-                    .commit();
+            ListFragment listFragment = ListFragment.newInstance();
+            addFragment(listFragment, ListFragment.TAG);
         }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        FileSystemHelper.quitHandler();
     }
 
     @Override
     public void onBackPressed() {
         FragmentManager fragmentManager = getSupportFragmentManager();
-        if (fragmentManager.getBackStackEntryCount() > 0) {
+        if (fragmentManager.getBackStackEntryCount() > 1) {
             fragmentManager.popBackStack();
         } else {
-            super.onBackPressed();
+           finish();
         }
     }
 
-    public DatabaseHelper getDatabaseHelper() {
-        return mDatabaseHelper;
+    public void addFragment(Fragment fragment, String tag) {
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.main_fragment_container, fragment, tag)
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                .addToBackStack(null)
+                .commit();
+    }
+
+    public void removeFragment(Fragment fragment) {
+        getSupportFragmentManager().beginTransaction()
+                .remove(fragment)
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE)
+                .commit();
     }
 }
