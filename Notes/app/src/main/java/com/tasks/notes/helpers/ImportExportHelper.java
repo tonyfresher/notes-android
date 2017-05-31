@@ -52,6 +52,9 @@ public class ImportExportHelper implements Closeable {
     public final static int ACTION_IMPORT = 42;
     public final static int ACTION_EXPORT = 24;
 
+    private static final int NOTIFICATION_ID_IMPORT = 6;
+    private static final int NOTIFICATION_ID_EXPORT = 7;
+
     public final static String ARG_URI = "uri";
     public final static String ARG_NOTES = "notes";
     public final static String ARG_STATUS = "status";
@@ -81,6 +84,11 @@ public class ImportExportHelper implements Closeable {
                                     msg.getData().getString(ImportExportHelper.ARG_STATUS),
                                     Toast.LENGTH_SHORT).show();
                         }
+
+                        if (msg.obj != null) {
+                            NotificationEnvelope notification = (NotificationEnvelope) msg.obj;
+                            notification.close();
+                        }
                         break;
                     }
                     case ImportExportHelper.ACTION_EXPORT: {
@@ -88,6 +96,11 @@ public class ImportExportHelper implements Closeable {
                             Toast.makeText(fragmentRef.get().getContext(),
                                     msg.getData().getString(ImportExportHelper.ARG_STATUS),
                                     Toast.LENGTH_SHORT).show();
+                        }
+
+                        if (msg.obj != null) {
+                            NotificationEnvelope notification = (NotificationEnvelope) msg.obj;
+                            notification.close();
                         }
                         break;
                     }
@@ -143,6 +156,14 @@ public class ImportExportHelper implements Closeable {
 
         Message msg = Message.obtain(workerHandler, ACTION_IMPORT);
         msg.setData(args);
+
+        if (fragmentRef.get() != null) {
+            final NotificationEnvelope notification = new NotificationEnvelope(
+                    fragmentRef.get().getContext(), NOTIFICATION_ID_IMPORT, "Import", true);
+            notification.start();
+            msg.obj = notification;
+        }
+
         msg.sendToTarget();
     }
 
@@ -168,7 +189,7 @@ public class ImportExportHelper implements Closeable {
             }
         }
 
-        Message reply = mainHandler.obtainMessage(ACTION_IMPORT);
+        Message reply = mainHandler.obtainMessage(ACTION_IMPORT, msg.obj);
         reply.setData(args);
         reply.sendToTarget();
     }
@@ -199,6 +220,14 @@ public class ImportExportHelper implements Closeable {
 
         Message msg = workerHandler.obtainMessage(ACTION_EXPORT);
         msg.setData(args);
+
+        if (fragmentRef.get() != null) {
+            final NotificationEnvelope notification = new NotificationEnvelope(
+                    fragmentRef.get().getContext(), NOTIFICATION_ID_EXPORT, "Export", true);
+            notification.start();
+            msg.obj = notification;
+        }
+
         msg.sendToTarget();
     }
 
@@ -224,7 +253,7 @@ public class ImportExportHelper implements Closeable {
             }
         }
 
-        Message reply = mainHandler.obtainMessage(ACTION_EXPORT);
+        Message reply = mainHandler.obtainMessage(ACTION_EXPORT, msg.obj);
         reply.setData(args);
         reply.sendToTarget();
     }

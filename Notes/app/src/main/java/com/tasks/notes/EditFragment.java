@@ -25,7 +25,6 @@ import com.tasks.notes.helpers.DatabaseHelper;
 
 import org.joda.time.DateTime;
 
-import java.io.Serializable;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -34,7 +33,8 @@ import butterknife.OnClick;
 import static com.tasks.notes.helpers.ColorsHelper.*;
 import static com.tasks.notes.helpers.DateHelper.ISO8601_DATE_FORMAT;
 
-public class EditFragment extends Fragment implements SquareFactory {
+public class EditFragment extends Fragment implements
+        OnBackPressedListener, SquareFactory {
 
     interface OnItemAddedListener {
         void onItemAdded(Note note);
@@ -54,8 +54,8 @@ public class EditFragment extends Fragment implements SquareFactory {
     public static EditFragment newInstance(OnItemAddedListener listener) {
         Bundle args = new Bundle();
         EditFragment fragment = new EditFragment();
-        fragment.setOnAddListener(listener);
         fragment.setArguments(args);
+        fragment.setOnAddListener(listener);
         return fragment;
     }
 
@@ -89,7 +89,6 @@ public class EditFragment extends Fragment implements SquareFactory {
     ImageView noteImage;
 
     private boolean isNewNote = true;
-    private boolean finished;
 
     private Note note;
     private int notePosition;
@@ -142,24 +141,13 @@ public class EditFragment extends Fragment implements SquareFactory {
 
         initFromNote();
 
-        finished = false;
-
         return rootView;
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        if (!finished) {
-            finish(false);
-        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        AppCompatActivity activity = (AppCompatActivity) getActivity();
-        activity.setSupportActionBar(toolbar);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         setHasOptionsMenu(true);
     }
 
@@ -191,6 +179,11 @@ public class EditFragment extends Fragment implements SquareFactory {
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
         menu.clear();
+    }
+
+    @Override
+    public void onBackPressed() {
+        finish(false);
     }
 
     private void initFromNote() {
@@ -258,8 +251,6 @@ public class EditFragment extends Fragment implements SquareFactory {
                 onChangeListener.onItemChanged(note, notePosition);
             }
         }
-
-        finished = true;
 
         ((MainActivity) getActivity()).removeFragment(this);
     }

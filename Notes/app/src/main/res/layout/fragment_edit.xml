@@ -50,10 +50,17 @@
                     <TextView
                         android:id="@+id/edit_delete"
                         style="@style/AppBarTextButton.Dark"
-                        android:layout_alignParentEnd="true"
-                        android:paddingEnd="16dp"
+                        android:layout_toStartOf="@+id/edit_save"
                         android:text="@string/delete_button"
                         android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/edit_save"
+                        style="@style/AppBarTextButton.Dark"
+                        android:layout_alignParentEnd="true"
+                        android:paddingLeft="16dp"
+                        android:paddingRight="16dp"
+                        android:text="@string/save_button" />
 
                 </RelativeLayout>
 

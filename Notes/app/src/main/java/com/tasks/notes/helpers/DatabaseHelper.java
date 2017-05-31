@@ -73,7 +73,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public HandyTask<Void, Void> dropTableTask() {
-        return new HandyTask<>((task, params) -> {
+        return new HandyTask<>(params -> {
             dropTable();
             return null;
         });
@@ -101,7 +101,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public HandyTask<Note, Void> insertTask() {
-        return new HandyTask<>((task, params) -> {
+        return new HandyTask<>(params -> {
             final Note note = params[0];
             insert(note);
             return null;
@@ -124,7 +124,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public HandyTask<Object, Void> replaceTask() {
-        return new HandyTask<>((task, params) -> {
+        return new HandyTask<>(params -> {
             final long row = (long) params[0];
             final Note note = (Note) params[1];
             replace(row, note);
@@ -144,7 +144,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public HandyTask<Long, Void> deleteTask() {
-        return new HandyTask<>((task, params) -> {
+        return new HandyTask<>(params -> {
             final long row = params[0];
             delete(row);
             return null;
@@ -164,7 +164,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public HandyTask<Object, Void> refreshViewedDateTask() {
-        return new HandyTask<>((task, params) -> {
+        return new HandyTask<>(params -> {
             final long row = (long) params[0];
             final String visited = (String) params[1];
             refreshViewedDate(row, visited);
@@ -223,7 +223,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public HandyTask<Comparator<Note>, List<Note>> getOrderedItemsTask() {
-        return new HandyTask<>((task, params) -> {
+        return new HandyTask<>(params -> {
             Comparator<Note> comparator = params[0];
             return getOrderedItems(comparator);
         });
@@ -240,14 +240,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public HandyTask<String, List<Note>> searchBySubstringTask() {
-        return new HandyTask<>((task, params) -> {
+        return new HandyTask<>(params -> {
             String substring = params[0];
             return searchBySubstring(substring);
         });
     }
 
     public AsyncTask<String, Integer, List<Note>> searchBySubstringAsync() {
-        return new HandyTask<>((task, params) -> {
+        return new HandyTask<>(params -> {
             String substring = params[0];
             return searchBySubstring(substring);
         });

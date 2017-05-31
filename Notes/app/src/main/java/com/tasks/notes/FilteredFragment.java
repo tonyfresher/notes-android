@@ -23,8 +23,8 @@ import com.tasks.notes.adapters.NotesAdapter;
 import com.tasks.notes.classes.Note;
 import com.tasks.notes.helpers.DatabaseHelper;
 import com.tasks.notes.helpers.HandyTask;
+import com.tasks.notes.helpers.NotificationEnvelope;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,10 +32,11 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class FilteredFragment extends Fragment implements Serializable,
-        EditFragment.OnItemStateChangedListener {
+public class FilteredFragment extends Fragment {
 
     public static final String TAG = "filtered_fragment";
+
+    private static final int NOTIFICATION_ID_SEARCH = 8;
 
     private static final String ARG_FILTERED_NOTES = "filtered_notes";
 
@@ -83,8 +84,16 @@ public class FilteredFragment extends Fragment implements Serializable,
                     return true;
                 }
 
+                final NotificationEnvelope notification = new NotificationEnvelope(
+                        getContext(), NOTIFICATION_ID_SEARCH, "Search...", true);
+
                 HandyTask<String, List<Note>> search = getDatabaseHelper().searchBySubstringTask();
+                search.setOnPreExecute(v -> {
+                    notification.start();
+                    return null;
+                });
                 search.setOnPostExecute(result -> {
+                    notification.close();
                     notesList.clear();
                     notesList.addAll(result);
                     notesRecyclerView.getAdapter().notifyDataSetChanged();
@@ -114,7 +123,28 @@ public class FilteredFragment extends Fragment implements Serializable,
 
         NotesAdapter adapter = new NotesAdapter(notesList, (v, position) -> {
             EditFragment fragment = EditFragment.newInstance(
-                    notesList.get(position), position, this);
+                    notesList.get(position), position, new EditFragment.OnItemStateChangedListener() {
+                        @Override
+                        public void onItemChanged(Note note, int position) {
+                            ListFragment parentFragment = (ListFragment) getActivity()
+                                    .getSupportFragmentManager()
+                                    .findFragmentByTag(ListFragment.TAG);
+                            parentFragment.refreshList();
+                            notesList.set(position, note);
+                            notesRecyclerView.getAdapter().notifyItemChanged(position);
+                        }
+
+                        @Override
+                        public void onItemRemoved(int position) {
+                            ListFragment parentFragment = (ListFragment) getActivity()
+                                    .getSupportFragmentManager()
+                                    .findFragmentByTag(ListFragment.TAG);
+                            parentFragment.refreshList();
+                            notesList.remove(position);
+                            notesRecyclerView.getAdapter().notifyItemRemoved(position);
+                        }
+                    });
+
             getActivity().getSupportFragmentManager().beginTransaction()
                     .add(R.id.main_fragment_container, fragment)
                     .addToBackStack(null)
@@ -129,27 +159,8 @@ public class FilteredFragment extends Fragment implements Serializable,
     @Override
     public void onResume() {
         super.onResume();
-        AppCompatActivity activity = (AppCompatActivity) getActivity();
-        activity.setSupportActionBar(toolbar);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         setHasOptionsMenu(true);
-    }
-
-    @Override
-    public void onItemChanged(Note note, int position) {
-        ListFragment parentFragment = (ListFragment) getActivity().getSupportFragmentManager()
-                .findFragmentByTag(ListFragment.TAG);
-        parentFragment.refreshList();
-        notesList.set(position, note);
-        notesRecyclerView.getAdapter().notifyItemChanged(position);
-    }
-
-    @Override
-    public void onItemRemoved(int position) {
-        ListFragment parentFragment = (ListFragment) getActivity().getSupportFragmentManager()
-                .findFragmentByTag(ListFragment.TAG);
-        parentFragment.refreshList();
-        notesList.remove(position);
-        notesRecyclerView.getAdapter().notifyItemRemoved(position);
     }
 
     @Override

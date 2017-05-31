@@ -90,8 +90,6 @@ public class FilterEditFragment extends Fragment implements
 
     @OnClick(R.id.filter_edit_save_button)
     protected void save() {
-        FilterFragment parent = (FilterFragment) getParentFragment();
-
         String name = nameEditText.getText().toString();
         if (name.isEmpty()) {
             Toast.makeText(getContext(), getString(R.string.enter_name), Toast.LENGTH_SHORT)
@@ -101,15 +99,15 @@ public class FilterEditFragment extends Fragment implements
 
         filter.setName(name);
         saveFilterToPrefs(filter);
-        parent.refreshSavedList();
+        ((FilterFragment) getParentFragment()).refreshSavedList();
+
         Toast.makeText(getContext(), getString(R.string.filter_was_saved), Toast.LENGTH_SHORT)
                 .show();
     }
 
     @OnClick(R.id.filter_edit_apply_button)
     protected void apply() {
-        FilterFragment parent = (FilterFragment) getParentFragment();
-        parent.exitWithFilter(filter);
+        ((FilterFragment) getParentFragment()).exitWithFilter(filter);
     }
 
     private void setOnLabelClickListener(TextView label, final TextView from, final TextView to) {

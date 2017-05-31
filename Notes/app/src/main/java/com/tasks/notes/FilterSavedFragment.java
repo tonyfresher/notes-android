@@ -47,10 +47,8 @@ public class FilterSavedFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_filter_saved, container, false);
         ButterKnife.bind(this, rootView);
 
-        FiltersAdapter adapter = new FiltersAdapter(savedFilters, (v, position) -> {
-            FilterFragment filterFragment = (FilterFragment) getParentFragment();
-            filterFragment.setFilter(savedFilters.get(position));
-        });
+        FiltersAdapter adapter = new FiltersAdapter(savedFilters, (v, position) ->
+            ((FilterFragment) getParentFragment()).setFilter(savedFilters.get(position)));
         savedFiltersRecyclerView.setAdapter(adapter);
         savedFiltersRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 

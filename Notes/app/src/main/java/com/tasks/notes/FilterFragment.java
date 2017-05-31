@@ -76,8 +76,7 @@ public class FilterFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        AppCompatActivity activity = (AppCompatActivity) getActivity();
-        activity.setSupportActionBar(toolbar);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         setHasOptionsMenu(true);
     }
 

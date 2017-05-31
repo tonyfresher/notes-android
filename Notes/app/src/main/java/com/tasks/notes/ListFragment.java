@@ -32,6 +32,7 @@ import com.tasks.notes.classes.Note;
 import com.tasks.notes.helpers.DatabaseHelper;
 import com.tasks.notes.helpers.ImportExportHelper;
 import com.tasks.notes.helpers.HandyTask;
+import com.tasks.notes.helpers.NotificationEnvelope;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -69,8 +70,7 @@ public class ListFragment extends Fragment {
 
     private static final int NOTIFICATION_ID_FILTER = 3;
     private static final int NOTIFICATION_ID_CREATE_100000 = 4;
-
-    private static final String SAVED_NOTES = "saved_notes";
+    private static final int NOTIFICATION_ID_REFRESH = 5;
 
     private Comparator<Note> notesComparator = Note.BY_CREATED_DESCENDING_COMPARATOR;
     private final ArrayList<Note> notesList = new ArrayList<>();
@@ -118,8 +118,7 @@ public class ListFragment extends Fragment {
                             notesRecyclerView.getAdapter().notifyItemRemoved(position);
                         }
                     });
-            MainActivity mainActivity = (MainActivity) getActivity();
-            mainActivity.addFragment(fragment, EditFragment.TAG);
+            ((MainActivity) getActivity()).addFragment(fragment, EditFragment.TAG);
         });
         notesRecyclerView.setAdapter(adapter);
         notesRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -145,8 +144,10 @@ public class ListFragment extends Fragment {
             if (bottomSheet.isSheetShowing()) {
                 bottomSheet.dismissSheet();
             }
-
             showFloatingButton();
+
+            refreshList();
+
             return true;
         });
         menuSheetView.inflateMenu(R.menu.menu_sort_bottom_sheet);
@@ -154,26 +155,19 @@ public class ListFragment extends Fragment {
         return rootView;
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putParcelableArrayList(SAVED_NOTES, notesList);
-    }
-
-    @Override
-    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
-        super.onViewStateRestored(savedInstanceState);
-        if (savedInstanceState != null) {
-            ArrayList<Note> notes = savedInstanceState.getParcelableArrayList(SAVED_NOTES);
-            notesList.clear();
-            notesList.addAll(notes);
-        }
-    }
-
     public void refreshList() {
         notesList.clear();
+
+        final NotificationEnvelope notification = new NotificationEnvelope(
+                getContext(), NOTIFICATION_ID_REFRESH, "Refreshing", true);
+
         HandyTask<Comparator<Note>, List<Note>> refresh = databaseHelper.getOrderedItemsTask();
+        refresh.setOnPreExecute(v -> {
+            notification.start();
+            return null;
+        });
         refresh.setOnPostExecute(result -> {
+            notification.close();
             notesList.addAll(result);
             notesRecyclerView.getAdapter().notifyDataSetChanged();
             return null;
@@ -188,8 +182,7 @@ public class ListFragment extends Fragment {
             Collections.sort(notesList, notesComparator);
             notesRecyclerView.getAdapter().notifyDataSetChanged();
         });
-        MainActivity activity = (MainActivity) getActivity();
-        activity.addFragment(editFragment, EditFragment.TAG);
+        ((MainActivity) getActivity()).addFragment(editFragment, EditFragment.TAG);
     }
 
     @Override
@@ -207,8 +200,7 @@ public class ListFragment extends Fragment {
         MenuItem searchView = menu.findItem(R.id.list_menu_search);
         searchView.setOnMenuItemClickListener(v -> {
             FilteredFragment filteredFragment = FilteredFragment.newInstance();
-            MainActivity activity = (MainActivity) getActivity();
-            activity.addFragment(filteredFragment, FilteredFragment.TAG);
+            ((MainActivity) getActivity()).addFragment(filteredFragment, FilteredFragment.TAG);
             return true;
         });
     }
@@ -230,7 +222,7 @@ public class ListFragment extends Fragment {
                 tryExport();
                 return true;
             case R.id.list_menu_create10000:
-                insert100000();
+                createNotes(10000); //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 return true;
             case R.id.list_menu_clear_all:
                 clearAll();
@@ -242,8 +234,11 @@ public class ListFragment extends Fragment {
 
     private void startFilterFragment() {
         FilterFragment filterFragment = FilterFragment.newInstance(resultFilter -> {
+            final NotificationEnvelope notification = new NotificationEnvelope(
+                    getContext(), NOTIFICATION_ID_FILTER, "Filtration", true);
+
             HandyTask<Object, List<Note>> filterTask =
-                    new HandyTask<>((task, params) -> {
+                    new HandyTask<>(params -> {
                         Filter filter = (Filter) params[0];
                         Comparator<Note> comparator = (Comparator<Note>) params[1];
 
@@ -261,18 +256,21 @@ public class ListFragment extends Fragment {
                         return filtered;
                     });
 
+            filterTask.setOnPreExecute(v -> {
+                notification.start();
+                return null;
+            });
             filterTask.setOnPostExecute(result -> {
+                notification.close();
                 FilteredFragment filteredFragment = FilteredFragment.newInstance(result);
-                MainActivity activity = (MainActivity) getActivity();
-                activity.addFragment(filteredFragment, FilteredFragment.TAG);
+                ((MainActivity) getActivity()).addFragment(filteredFragment, FilteredFragment.TAG);
                 return null;
             });
 
             filterTask.execute(resultFilter, notesComparator);
         });
 
-        MainActivity activity = (MainActivity) getActivity();
-        activity.addFragment(filterFragment, FilterFragment.TAG);
+        ((MainActivity) getActivity()).addFragment(filterFragment, FilterFragment.TAG);
     }
 
     private void tryImport(Uri uri) {
@@ -305,9 +303,11 @@ public class ListFragment extends Fragment {
         startActivityForResult(exportIntent, RESULT_FILE_TO_READ);
     }
 
-    private void insert100000() {
-        HandyTask<Void, Void> insert = new HandyTask<>((task, params) -> {
-            final int count = 100000;
+    private void createNotes(final int count) {
+        final NotificationEnvelope notification = new NotificationEnvelope(
+                getContext(), NOTIFICATION_ID_CREATE_100000, "Insertion", false);
+
+        HandyTask<Void, Void> insert = new HandyTask<>(params -> {
             Note note = new Note("Foo", "Bar");
 
             List<Note> notes = new ArrayList<>(count / 100);
@@ -320,17 +320,20 @@ public class ListFragment extends Fragment {
                     notes.get(j).setDescription(Integer.toString(j));
                 }
                 databaseHelper.insertList(notes);
-                task.updateNotification(i);
+                notification.update(i);
             }
 
             return null;
         });
-        insert.setOnPostExecute(result -> {
-            onResume();
+        insert.setOnPreExecute(v -> {
+            notification.start();
             return null;
         });
-        insert.setNotification(
-                getContext(), NOTIFICATION_ID_CREATE_100000, "Inserting 100000", false);
+        insert.setOnPostExecute(result -> {
+            notification.complete(getString(R.string.completed));
+            refreshList();
+            return null;
+        });
         insert.execute();
     }
 
