@@ -222,7 +222,7 @@ public class ListFragment extends Fragment {
                 tryExport();
                 return true;
             case R.id.list_menu_create10000:
-                createNotes(10000); //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                createNotes(100000); //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 return true;
             case R.id.list_menu_clear_all:
                 clearAll();
