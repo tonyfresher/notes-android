@@ -258,7 +258,6 @@ public class ImportExportHelper implements Closeable {
         reply.sendToTarget();
     }
 
-
     public void close() {
         handlerThread.quit();
     }

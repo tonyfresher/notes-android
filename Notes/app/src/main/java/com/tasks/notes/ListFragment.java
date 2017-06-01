@@ -357,7 +357,7 @@ public class ListFragment extends Fragment {
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String permissions[],
+                                           @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         switch (requestCode) {
             case REQUEST_PERMISSION_READ:
