@@ -6,13 +6,14 @@
     <string name="description">Description</string>
     <string name="image_url">Image URL</string>
     <string name="started">Started</string>
-    <string name="performing">Performing...</string>
+    <string name="performing">Performing…</string>
     <string name="completed">Completed</string>
 
     <string name="note_saved">Note saved</string>
     <string name="note_deleted">Note deleted</string>
 
-    <string name="search">Search</string>
+    <string name="search_hint">Search</string>
+    <string name="back">Back</string>
     <string name="sort">Sort</string>
     <string name="filter">Filter</string>
     <string name="importFile">Import</string>
@@ -21,16 +22,16 @@
     <string name="clear_all">Clear all</string>
 
     <string name="by_name">By title</string>
-    <string name="by_created">By createdFrom time</string>
-    <string name="by_edited">By editedFrom time</string>
-    <string name="by_viewed">By viewedFrom time</string>
+    <string name="by_created">By created (from) time</string>
+    <string name="by_edited">By edited (from) time</string>
+    <string name="by_viewed">By viewed (from) time</string>
 
     <string name="cant_write">Can\'t write: permission denied</string>
     <string name="cant_read">Can\'t read: permission denied</string>
     <string name="wrong_file">Wrong file</string>
     <string name="error">Error</string>
     <string name="successfully_imported">Notes are successfully imported</string>
-    <string name="successfully_exported_to">Notes are successfully exported to</string>
+    <string name="successfully_exported_to">Notes are exported to</string>
 
     <string name="apply_button">APPLY</string>
     <string name="save_button">SAVE</string>

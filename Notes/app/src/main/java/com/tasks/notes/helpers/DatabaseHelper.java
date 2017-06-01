@@ -11,10 +11,21 @@ import android.support.annotation.NonNull;
 import com.tasks.notes.classes.Note;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
+
+    private static DatabaseHelper instance;
+
+    public static DatabaseHelper getInstance(Context context) {
+        if (instance == null) {
+            instance = new DatabaseHelper(context);
+        }
+        return instance;
+    }
+
     private final static String TABLE_NAME = "Notes";
     private final static String NOTE_ROWID = "_id";
     private final static String NOTE_TITLE = "Name";
@@ -38,7 +49,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             "SELECT * FROM %s WHERE %s LIKE ? OR %s LIKE ?",
             TABLE_NAME, NOTE_TITLE, NOTE_DESCRIPTION);
 
-    public DatabaseHelper(Context context) {
+    private DatabaseHelper(Context context) {
         super(context, String.format("%sDatabase.db", TABLE_NAME), null, 1);
     }
 
@@ -53,14 +64,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public void dropTable() {
+
+    public synchronized void dropTable() {
         try (SQLiteDatabase db = this.getWritableDatabase()) {
             db.execSQL(DROP_TABLE_QUERY);
             db.execSQL(CREATE_TABLE_QUERY);
         }
     }
 
-    public void insert(Note note) {
+    public HandyTask<Void, Void> dropTableTask() {
+        return new HandyTask<>(params -> {
+            dropTable();
+            return null;
+        });
+    }
+
+    public AsyncTask<Void, Integer, Void> dropTableAsync() {
+        return dropTableTask().execute();
+    }
+
+
+    public synchronized void insert(Note note) {
         ContentValues values = getContentValuesFromNote(note);
 
         try (SQLiteDatabase db = this.getWritableDatabase()) {
@@ -68,19 +92,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    public AsyncTask<Note, Integer, Void> insertAsync(Note note) {
-        AsyncTask<Note, Integer, Void> t = new AsyncTask<Note, Integer, Void>() {
-            @Override
-            protected Void doInBackground(Note... params) {
-                final Note note = params[0];
-                insert(note);
-                return null;
+    public synchronized void insertList(List<Note> notes) {
+        try (SQLiteDatabase db = this.getWritableDatabase()) {
+            for (Note note : notes) {
+                db.insert(TABLE_NAME, null, getContentValuesFromNote(note));
             }
-        };
-        return t.execute(note);
+        }
     }
 
-    public void replace(long row, Note note) {
+    public HandyTask<Note, Void> insertTask() {
+        return new HandyTask<>(params -> {
+            final Note note = params[0];
+            insert(note);
+            return null;
+        });
+    }
+
+    public AsyncTask<Note, Integer, Void> insertAsync(Note note) {
+        return insertTask().execute(note);
+    }
+
+
+    public synchronized void replace(long row, Note note) {
         ContentValues values = getContentValuesFromNote(note);
 
         try (SQLiteDatabase db = this.getWritableDatabase()) {
@@ -90,59 +123,62 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    public AsyncTask<Object, Integer, Void> replaceAsync(long row, Note note) {
-        AsyncTask<Object, Integer, Void> t = new AsyncTask<Object, Integer, Void>() {
-            @Override
-            protected Void doInBackground(Object... params) {
-                final long row = (long) params[0];
-                final Note note = (Note) params[1];
-                replace(row, note);
-                return null;
-            }
-        };
-        return t.execute(row, note);
+    public HandyTask<Object, Void> replaceTask() {
+        return new HandyTask<>(params -> {
+            final long row = (long) params[0];
+            final Note note = (Note) params[1];
+            replace(row, note);
+            return null;
+        });
     }
 
-    public void delete(long row) {
+    public AsyncTask<Object, Integer, Void> replaceAsync(long row, Note note) {
+        return replaceTask().execute(row, note);
+    }
+
+
+    public synchronized void delete(long row) {
         try (SQLiteDatabase db = this.getWritableDatabase()) {
             db.delete(TABLE_NAME, String.format("%s=%s", NOTE_ROWID, row), null);
         }
     }
 
-    public AsyncTask<Long, Integer, Void> deleteAsync(long row) {
-        AsyncTask<Long, Integer, Void> t = new AsyncTask<Long, Integer, Void>() {
-            @Override
-            protected Void doInBackground(Long... params) {
-                final long row = params[0];
-                delete(row);
-                return null;
-            }
-        };
-        return t.execute(row);
+    public HandyTask<Long, Void> deleteTask() {
+        return new HandyTask<>(params -> {
+            final long row = params[0];
+            delete(row);
+            return null;
+        });
     }
 
-    public void refreshViewedDate(long row, String visited) {
+    public AsyncTask<Long, Integer, Void> deleteAsync(long row) {
+        return deleteTask().execute(row);
+    }
+
+
+    public synchronized void refreshViewedDate(long row, String visited) {
         try (SQLiteDatabase db = this.getWritableDatabase()) {
             db.execSQL(UPDATE_VIEWED_WHERE_ROWID_QUERY,
                     new String[]{visited, Long.toString(row)});
         }
     }
 
-    public AsyncTask<Object, Integer, Void> refreshViewedDateAsync(long row, String visited) {
-        AsyncTask<Object, Integer, Void> t = new AsyncTask<Object, Integer, Void>() {
-            @Override
-            protected Void doInBackground(Object... params) {
-                final long row = (long) params[0];
-                final String visited = (String) params[1];
-                refreshViewedDate(row, visited);
-                return null;
-            }
-        };
-        return t.execute(row, visited);
+    public HandyTask<Object, Void> refreshViewedDateTask() {
+        return new HandyTask<>(params -> {
+            final long row = (long) params[0];
+            final String visited = (String) params[1];
+            refreshViewedDate(row, visited);
+            return null;
+        });
     }
 
-    public Note[] getItems(String query, String[] args) {
-        ArrayList<Note> notes = new ArrayList<>();
+    public AsyncTask<Object, Integer, Void> refreshViewedDateAsync(long row, String visited) {
+        return refreshViewedDateTask().execute(row, visited);
+    }
+
+
+    private synchronized List<Note> getItems(String query, String[] args) {
+        List<Note> notes = new ArrayList<>();
 
         try (SQLiteDatabase db = this.getWritableDatabase()) {
             Cursor c = db.rawQuery(query, args);
@@ -176,35 +212,47 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             c.close();
         }
 
-        Note[] notesArray = new Note[notes.size()];
-        return notes.toArray(notesArray);
+        return notes;
     }
 
-    public Note[] getOrderedItems(@NonNull Comparator<Note> comparator) {
-        Note[] items = getItems(SELECT_ALL_QUERY, null);
-        Arrays.sort(items, comparator);
+
+    public List<Note> getOrderedItems(@NonNull Comparator<Note> comparator) {
+        List<Note> items = getItems(SELECT_ALL_QUERY, null);
+        Collections.sort(items, comparator);
         return items;
     }
 
-    public AsyncTask<Comparator<Note>, Integer, Note[]> getOrderedItemsAsync(
-            @NonNull Comparator<Note> comparator) {
-        AsyncTask<Comparator<Note>, Integer, Note[]> t =
-                new AsyncTask<Comparator<Note>, Integer, Note[]>() {
-                    @Override
-                    protected Note[] doInBackground(Comparator<Note>... params) {
-                        Comparator<Note> comparator = params[0];
-                        Note[] items = getItems(SELECT_ALL_QUERY, null);
-                        Arrays.sort(items, comparator);
-                        return items;
-                    }
-                };
-        return t.execute(comparator);
+    public HandyTask<Comparator<Note>, List<Note>> getOrderedItemsTask() {
+        return new HandyTask<>(params -> {
+            Comparator<Note> comparator = params[0];
+            return getOrderedItems(comparator);
+        });
     }
 
-    public Note[] searchBySubstring(String substring) {
+    public AsyncTask<Comparator<Note>, Integer, List<Note>> getOrderedItemsAsync(@NonNull Comparator<Note> comparator) {
+        return getOrderedItemsTask().execute(comparator);
+    }
+
+
+    public synchronized List<Note> searchBySubstring(String substring) {
         return getItems(SEARCH_SUBSTRING,
                 new String[]{"%" + substring + "%", "%" + substring + "%"});
     }
+
+    public HandyTask<String, List<Note>> searchBySubstringTask() {
+        return new HandyTask<>(params -> {
+            String substring = params[0];
+            return searchBySubstring(substring);
+        });
+    }
+
+    public AsyncTask<String, Integer, List<Note>> searchBySubstringAsync() {
+        return new HandyTask<>(params -> {
+            String substring = params[0];
+            return searchBySubstring(substring);
+        });
+    }
+
 
     private ContentValues getContentValuesFromNote(Note note) {
         ContentValues values = new ContentValues();
