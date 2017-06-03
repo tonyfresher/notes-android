@@ -10,46 +10,48 @@ import android.widget.TextView;
 import com.tasks.notes.classes.Filter;
 import com.tasks.notes.R;
 
-import java.util.List;
-
 public class FiltersAdapter extends RecyclerView.Adapter<FiltersAdapter.ViewHolder> {
-    public interface OnItemTouchListener {
-        void onItemClick(View view, int position);
+    public interface OnItemClickListener {
+        void onItemClick(View v, int position);
     }
 
-    private final OnItemTouchListener listener;
-    private final List<Filter> data;
+    private static OnItemClickListener mListener;
+    private Filter[] mData;
 
-    public FiltersAdapter(List<Filter> data, OnItemTouchListener listener) {
-        this.data = data;
-        this.listener = listener;
+    public FiltersAdapter(Filter[] objects, OnItemClickListener listener) {
+        mData = objects;
+        mListener = listener;
     }
 
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_filter, parent, false);
-        return new ViewHolder(v, listener);
+                .inflate(R.layout.filter_item, parent, false);
+        return new ViewHolder(v);
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.name.setText(data.get(position).getName());
+        holder.name.setText(mData[position].getName());
     }
 
     @Override
     public int getItemCount() {
-        return data.size();
+        return mData.length;
     }
 
-
-    protected static class ViewHolder extends RecyclerView.ViewHolder {
+    protected static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView name;
 
-        public ViewHolder(View viewItem, OnItemTouchListener listener) {
+        public ViewHolder(View viewItem) {
             super(viewItem);
-            name = (TextView) viewItem.findViewById(R.id.filter_edit_name);
-            viewItem.setOnClickListener((v) -> listener.onItemClick(v, getLayoutPosition()));
+            name = (TextView) viewItem.findViewById(R.id.filter_name);
+            viewItem.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            mListener.onItemClick(v, this.getLayoutPosition());
         }
     }
 }
