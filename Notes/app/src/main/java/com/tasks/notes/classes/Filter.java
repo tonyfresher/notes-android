@@ -17,7 +17,6 @@ import java.lang.reflect.Type;
 
 
 public class Filter implements Parcelable {
-    public final static String INTENT_EXTRA = "Filter";
 
     private String name;
     private int color;

@@ -3,12 +3,12 @@
     android:layout_height="match_parent">
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:orientation="vertical">
 
         <EditText
-            android:id="@+id/filter_name"
+            android:id="@+id/filter_edit_name"
             style="@style/FullWidthEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -36,7 +36,7 @@
                 android:textSize="@dimen/abc_text_size_subhead_material" />
 
             <TextView
-                android:id="@+id/filter_created_from"
+                android:id="@+id/filter_edit_created_from"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/created_label"
@@ -48,7 +48,7 @@
                 android:visibility="gone" />
 
             <TextView
-                android:id="@+id/filter_created_to"
+                android:id="@+id/filter_edit_created_to"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/created_label"
@@ -73,7 +73,7 @@
             android:paddingTop="8dp">
 
             <TextView
-                android:id="@+id/filter_edited_label"
+                android:id="@+id/filter_edit_edited_label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/edited_label"
@@ -82,7 +82,7 @@
                 android:textSize="@dimen/abc_text_size_subhead_material" />
 
             <TextView
-                android:id="@+id/filter_edited_from"
+                android:id="@+id/filter_edit_edited_from"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/created_label"
@@ -94,7 +94,7 @@
                 android:visibility="gone" />
 
             <TextView
-                android:id="@+id/filter_edited_to"
+                android:id="@+id/filter_edit_edited_to"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/created_label"
@@ -119,7 +119,7 @@
             android:paddingTop="8dp">
 
             <TextView
-                android:id="@+id/filter_viewed_label"
+                android:id="@+id/filter_edit_viewed_label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/viewed_label"
@@ -128,7 +128,7 @@
                 android:textSize="@dimen/abc_text_size_subhead_material" />
 
             <TextView
-                android:id="@+id/filter_viewed_from"
+                android:id="@+id/filter_edit_viewed_from"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/created_label"
@@ -140,7 +140,7 @@
                 android:visibility="gone" />
 
             <TextView
-                android:id="@+id/filter_viewed_to"
+                android:id="@+id/filter_edit_viewed_to"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/created_label"
@@ -156,7 +156,7 @@
         <View style="@style/Divider" />
 
         <HorizontalScrollView
-            android:id="@+id/filter_colors"
+            android:id="@+id/filter_edit_colors"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
@@ -165,7 +165,7 @@
             android:scrollbars="none">
 
             <LinearLayout
-                android:id="@+id/filter_colors_layout"
+                android:id="@+id/filter_edit_colors_layout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="horizontal">
@@ -183,14 +183,14 @@
             android:paddingRight="@dimen/activity_horizontal_margin">
 
             <Button
-                android:id="@+id/filter_save_button"
+                android:id="@+id/filter_edit_save_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/save_button" />
 
             <Button
-                android:id="@+id/filter_apply_button"
+                android:id="@+id/filter_edit_apply_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"

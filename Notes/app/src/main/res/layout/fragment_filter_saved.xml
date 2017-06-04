@@ -5,10 +5,10 @@
     android:layout_height="match_parent"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
-    tools:context="com.tasks.notes.SavedFiltersPage">
+    tools:context="com.tasks.notes.FilterSavedFragment">
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/filter_saved_filters_list"
+        android:id="@+id/filter_filter_saved_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
