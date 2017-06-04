@@ -24,7 +24,8 @@ import org.joda.time.DateTime;
 
 import static com.tasks.notes.helpers.DateHelper.ISO8601_DATE_FORMAT;
 
-public class Note implements Parcelable, Serializable {
+public class Note implements Serializable, Parcelable {
+    public final static String INTENT_EXTRA = "note";
 
     private long id;
     private String title;
@@ -53,8 +54,8 @@ public class Note implements Parcelable, Serializable {
         this.description = description;
     }
 
-    public Note(long id, String title, String description, String imageUrl, int color,
-                @NonNull String created, @NonNull String edited, @NonNull String viewed) {
+    public Note(long id, String title, String description, String imageUrl,
+                int color, String created, String edited, String viewed) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -104,30 +105,27 @@ public class Note implements Parcelable, Serializable {
         this.color = color;
     }
 
-    @NonNull
     public String getCreated() {
         return created;
     }
 
-    public void setCreated(@NonNull String created) {
+    public void setCreated(String created) {
         this.created = created;
     }
 
-    @NonNull
     public String getEdited() {
         return edited;
     }
 
-    public void setEdited(@NonNull String edited) {
+    public void setEdited(String edited) {
         this.edited = edited;
     }
 
-    @NonNull
     public String getViewed() {
         return viewed;
     }
 
-    public void setViewed(@NonNull String viewed) {
+    public void setViewed(String viewed) {
         this.viewed = viewed;
     }
 

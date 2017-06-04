@@ -11,61 +11,59 @@ import android.widget.TextView;
 import com.tasks.notes.classes.Note;
 import com.tasks.notes.R;
 
-import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
 public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.ViewHolder> {
-
-    public interface OnItemTouchListener {
+    public interface OnItemClickListener {
         void onItemClick(View v, int position);
     }
 
-    private final OnItemTouchListener listener;
-    private final List<Note> data;
+    private static OnItemClickListener mListener;
+    private Note[] mData;
 
-    public NotesAdapter(List<Note> data, OnItemTouchListener listener) {
-        this.data = data;
-        this.listener = listener;
+    public NotesAdapter(Note[] objects, OnItemClickListener listener) {
+        mData = objects;
+        mListener = listener;
     }
 
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_note, parent, false);
-        return new ViewHolder(v, listener);
+                .inflate(R.layout.note_item, parent, false);
+        return new ViewHolder(v);
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.title.setText(data.get(position).getTitle());
-        holder.description.setText(data.get(position).getDescription());
-        holder.container.setBackgroundColor(data.get(position).getColor());
-        holder.title.setVisibility("".equals(data.get(position).getTitle()) ?
+        holder.title.setText(mData[position].getTitle());
+        holder.description.setText(mData[position].getDescription());
+        holder.container.setBackgroundColor(mData[position].getColor());
+        holder.title.setVisibility("".equals(mData[position].getTitle()) ?
                 View.GONE : View.VISIBLE);
-        holder.description.setVisibility("".equals(data.get(position).getDescription()) ?
+        holder.description.setVisibility("".equals(mData[position].getDescription()) ?
                 View.GONE : View.VISIBLE);
     }
 
     @Override
     public int getItemCount() {
-        return data.size();
+        return mData.length;
     }
 
-
-    protected static class ViewHolder extends RecyclerView.ViewHolder {
-        @BindView(R.id.list_item_title)
+    protected static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView title;
-        @BindView(R.id.list_item_description)
         TextView description;
-        @BindView(R.id.list_item_container)
         RelativeLayout container;
 
-        public ViewHolder(View viewItem, OnItemTouchListener listener) {
+        public ViewHolder(View viewItem) {
             super(viewItem);
-            ButterKnife.bind(this, viewItem);
-            viewItem.setOnClickListener((v) -> listener.onItemClick(v, getLayoutPosition()));
+            title = (TextView) viewItem.findViewById(R.id.list_item_title);
+            description = (TextView) viewItem.findViewById(R.id.list_item_description);
+            container = (RelativeLayout) viewItem.findViewById(R.id.list_item_container);
+
+            viewItem.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            mListener.onItemClick(v, this.getLayoutPosition());
         }
     }
 }
