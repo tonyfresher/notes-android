@@ -147,10 +147,7 @@ public class FilteredFragment extends Fragment {
                         }
                     });
 
-            getActivity().getSupportFragmentManager().beginTransaction()
-                    .add(R.id.main_fragment_container, fragment)
-                    .addToBackStack(null)
-                    .commit();
+            ((MainActivity)getActivity()).addFragment(fragment, EditFragment.TAG);
         });
         notesRecyclerView.setAdapter(adapter);
         notesRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -173,9 +170,6 @@ public class FilteredFragment extends Fragment {
 
     @OnClick(R.id.filtered_exit)
     protected void exit() {
-        getActivity().getSupportFragmentManager().beginTransaction()
-                .remove(this)
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE)
-                .commit();
+        ((MainActivity)getActivity()).removeFragment(this);
     }
 }

@@ -21,10 +21,10 @@
     <string name="create100000">Create 100000</string>
     <string name="clear_all">Clear all</string>
 
-    <string name="by_name">By title</string>
-    <string name="by_created">By created (from) time</string>
-    <string name="by_edited">By edited (from) time</string>
-    <string name="by_viewed">By viewed (from) time</string>
+    <string name="by_title">By title</string>
+    <string name="by_created">By created time</string>
+    <string name="by_edited">By edited time</string>
+    <string name="by_viewed">By viewed time</string>
 
     <string name="cant_write">Can\'t write: permission denied</string>
     <string name="cant_read">Can\'t read: permission denied</string>

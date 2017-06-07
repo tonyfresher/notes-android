@@ -51,6 +51,11 @@ public class ImportExportService implements Closeable {
 
     public final static String FILE_NAME = "itemlist.ili";
 
+    public final static int STATUS_SUCCESSFULLY_IMPORTED = 0;
+    public final static int STATUS_SUCCESSFULLY_EXPORT = 1;
+    public final static int STATUS_CANT_READ = 2;
+    public final static int STATUS_WRONG_FILE = 3;
+
     private final static int ACTION_IMPORT = 42;
     private final static int ACTION_EXPORT = 24;
 

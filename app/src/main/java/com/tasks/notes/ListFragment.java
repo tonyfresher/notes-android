@@ -9,10 +9,14 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -25,13 +29,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.flipboard.bottomsheet.BottomSheetLayout;
-import com.flipboard.bottomsheet.commons.MenuSheetView;
 import com.tasks.notes.helpers.AsyncTaskBuilder;
 import com.tasks.notes.infrastructure.NotesAdapter;
 import com.tasks.notes.domain.Filter;
 import com.tasks.notes.domain.Note;
 import com.tasks.notes.helpers.NotificationWrapper;
+import com.tasks.notes.infrastructure.OnBackPressedListener;
 import com.tasks.notes.infrastructure.OnItemStateChangedListener;
 import com.tasks.notes.storage.AsyncStorageProvider;
 import com.tasks.notes.storage.DatabaseProvider;
@@ -46,7 +49,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class ListFragment extends Fragment {
+public class ListFragment extends Fragment
+        implements OnBackPressedListener, NavigationView.OnNavigationItemSelectedListener {
 
     public static final String TAG = "list_fragment";
 
@@ -57,15 +61,17 @@ public class ListFragment extends Fragment {
         return fragment;
     }
 
+    @Nullable
+    @BindView(R.id.list_drawer_layout)
+    DrawerLayout drawerLayout;
+    @BindView(R.id.list_drawer)
+    NavigationView navigationView;
     @BindView(R.id.list_toolbar)
     Toolbar toolbar;
     @BindView(R.id.list_notes)
     RecyclerView notesRecyclerView;
     @BindView(R.id.list_add_floating_button)
     FloatingActionButton addFloatingButton;
-    @BindView(R.id.list_bottom_sheet)
-    BottomSheetLayout bottomSheet;
-    private MenuSheetView menuSheetView;
 
     private static final int REQUEST_PERMISSION_READ = 0;
     private static final int REQUEST_PERMISSION_WRITE = 1;
@@ -78,22 +84,22 @@ public class ListFragment extends Fragment {
     private Comparator<Note> notesComparator = Note.BY_CREATED_DESCENDING_COMPARATOR;
     private final ArrayList<Note> notesList = new ArrayList<>();
 
-    private ImportExportService importExportHelper;
+    private ImportExportService importExportService;
 
-    private AsyncStorageProvider getDatabaseProvider() {
-        return DatabaseProvider.getInstance(getContext());
-    }
+    private AsyncStorageProvider databaseProvider;
 
+    @Nullable
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        importExportHelper = ImportExportService.getInstance(this);
+        importExportService = ImportExportService.getInstance(this);
+        databaseProvider = DatabaseProvider.getInstance(getContext());
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        importExportHelper.close();
+        importExportService.close();
     }
 
     @Override
@@ -101,6 +107,8 @@ public class ListFragment extends Fragment {
             savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_list, container, false);
         ButterKnife.bind(this, rootView);
+
+        navigationView.setNavigationItemSelectedListener(this);
 
         NotesAdapter adapter = new NotesAdapter(notesList, (v, position) -> {
             EditFragment fragment = EditFragment.newInstance(
@@ -129,32 +137,6 @@ public class ListFragment extends Fragment {
 
         refreshList();
 
-        menuSheetView = new MenuSheetView(
-                getContext(), MenuSheetView.MenuType.LIST, "Sort...", item -> {
-            switch (item.getItemId()) {
-                case R.id.bottom_sheet_sort_by_name:
-                    notesComparator = Note.BY_NAME_COMPARATOR;
-                    break;
-                case R.id.bottom_sheet_sort_by_created:
-                    notesComparator = Note.BY_CREATED_DESCENDING_COMPARATOR;
-                    break;
-                case R.id.bottom_sheet_sort_by_edited:
-                    notesComparator = Note.BY_EDITED_DESCENDING_COMPARATOR;
-                    break;
-                case R.id.bottom_sheet_sort_by_viewed:
-                    notesComparator = Note.BY_VIEWED_DESCENDING_COMPARATOR;
-                    break;
-            }
-            if (bottomSheet.isSheetShowing()) {
-                bottomSheet.dismissSheet();
-            }
-            showFloatingButton();
-            refreshList();
-
-            return true;
-        });
-        menuSheetView.inflateMenu(R.menu.menu_list_bottom_sheet);
-
         return rootView;
     }
 
@@ -162,7 +144,7 @@ public class ListFragment extends Fragment {
         final NotificationWrapper notification = new NotificationWrapper(
                 getContext(), NOTIFICATION_ID_REFRESH, "Refreshing", true);
 
-        getDatabaseProvider()
+        databaseProvider
                 .getGetAllTask()
                 .setOnPreExecute(v -> {
                     notification.start();
@@ -192,13 +174,13 @@ public class ListFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        AppCompatActivity activity = (AppCompatActivity) getActivity();
-        activity.setSupportActionBar(toolbar);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         setHasOptionsMenu(true);
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        menu.clear();
         inflater.inflate(R.menu.menu_list, menu);
 
         MenuItem searchView = menu.findItem(R.id.list_menu_search);
@@ -210,30 +192,57 @@ public class ListFragment extends Fragment {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.list_drawer_menu_sort:
-                hideFloatingButton();
-                bottomSheet.showWithSheetView(menuSheetView);
+    public boolean onBackPressed() {
+        if (drawerLayout != null) {
+            if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                drawerLayout.closeDrawer(GravityCompat.START);
                 return true;
-            case R.id.list_drawer_menu_filter:
-                startFilterFragment();
-                return true;
-            case R.id.list_drawer_menu_import:
-                requestImportFile();
-                return true;
-            case R.id.list_drawer_menu_export:
-                tryExport();
-                return true;
-            case R.id.list_drawer_menu_create100000:
-                createNotes(100000);
-                return true;
-            case R.id.list_drawer_menu_clear_all:
-                clearAll();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+            }
         }
+        return false;
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.list_navigation_view_sort_by_name:
+                notesComparator = Note.BY_NAME_COMPARATOR;
+                refreshList();
+                break;
+            case R.id.list_navigation_view_sort_by_created:
+                notesComparator = Note.BY_CREATED_DESCENDING_COMPARATOR;
+                refreshList();
+                break;
+            case R.id.list_navigation_view_sort_by_edited:
+                notesComparator = Note.BY_EDITED_DESCENDING_COMPARATOR;
+                refreshList();
+                break;
+            case R.id.list_navigation_view_sort_by_viewed:
+                notesComparator = Note.BY_VIEWED_DESCENDING_COMPARATOR;
+                refreshList();
+                break;
+            case R.id.list_navigation_view_filter:
+                startFilterFragment();
+                break;
+            case R.id.list_navigation_view_import:
+                requestImportFile();
+                break;
+            case R.id.list_navigation_view_export:
+                tryExport();
+                break;
+            case R.id.list_navigation_view_create100000:
+                createNotes(100000);
+                break;
+            case R.id.list_navigation_view_clear_all:
+                clearAll();
+                break;
+        }
+
+        if (drawerLayout != null) {
+            drawerLayout.closeDrawer(GravityCompat.START);
+        }
+
+        return true;
     }
 
     private void startFilterFragment() {
@@ -246,7 +255,7 @@ public class ListFragment extends Fragment {
                         Filter filter = (Filter) params[0];
                         Comparator<Note> comparator = (Comparator<Note>) params[1];
 
-                        List<Note> notes = getDatabaseProvider().getAll();
+                        List<Note> notes = databaseProvider.getAll();
                         Collections.sort(notes, comparator);
                         int count = notes.size();
 
@@ -278,7 +287,7 @@ public class ListFragment extends Fragment {
 
     private void tryImport(Uri uri) {
         if (isPermissionAllowed(Manifest.permission.READ_EXTERNAL_STORAGE)) {
-            importExportHelper.sendImportMessage(uri);
+            importExportService.sendImportMessage(uri);
         } else {
             requestPermission(
                     Manifest.permission.READ_EXTERNAL_STORAGE, REQUEST_PERMISSION_READ);
@@ -287,14 +296,15 @@ public class ListFragment extends Fragment {
 
     private void tryExport() {
         if (isPermissionAllowed(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-            getDatabaseProvider()
+            databaseProvider
                     .getGetAllTask()
                     .setOnPostExecute(result -> {
-                        importExportHelper.sendExportMessage(result);
+                        importExportService.sendExportMessage(result);
                         return null;
                     })
                     .execute();
         } else {
+            BottomSheetBehavior.
             requestPermission(
                     Manifest.permission.WRITE_EXTERNAL_STORAGE, REQUEST_PERMISSION_WRITE);
         }
@@ -324,7 +334,7 @@ public class ListFragment extends Fragment {
                         for (int j = 0; j < notes.size(); j++) {
                             notes.get(j).setDescription(Integer.toString(j));
                         }
-                        getDatabaseProvider().saveMany(notes);
+                        databaseProvider.saveMany(notes);
                         notification.update(i);
                     }
 
@@ -343,7 +353,7 @@ public class ListFragment extends Fragment {
     }
 
     private void clearAll() {
-        getDatabaseProvider()
+        databaseProvider
                 .getDeleteAllTask()
                 .setOnPostExecute(result -> {
                     refreshList();
@@ -392,18 +402,6 @@ public class ListFragment extends Fragment {
 
     private void requestPermission(String permission, int request) {
         ActivityCompat.requestPermissions(getActivity(), new String[]{permission}, request);
-    }
-
-    private void showFloatingButton() {
-        addFloatingButton.animate()
-                .scaleX(1).scaleY(1).setDuration(300)
-                .start();
-    }
-
-    private void hideFloatingButton() {
-        addFloatingButton.animate()
-                .scaleX(0).scaleY(0).setDuration(150)
-                .start();
     }
 
     private void showErrorDialog(String message) {

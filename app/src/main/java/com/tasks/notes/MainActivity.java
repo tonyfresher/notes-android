@@ -24,17 +24,23 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        for (Fragment f : getSupportFragmentManager().getFragments()) {
-            if (f.isAdded() && f instanceof OnBackPressedListener) {
-                ((OnBackPressedListener) f).onBackPressed();
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        if (fragmentManager.getBackStackEntryCount() > 0) {
+            String fragmentName = fragmentManager
+                    .getBackStackEntryAt(fragmentManager.getBackStackEntryCount() - 1)
+                    .getName();
+            Fragment fragment = fragmentManager.findFragmentByTag(fragmentName);
+
+            if (fragment instanceof OnBackPressedListener &&
+                    ((OnBackPressedListener) fragment).onBackPressed()) {
+                return;
             }
         }
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        if (fragmentManager.getBackStackEntryCount() > 0) {
+        if (fragmentManager.getBackStackEntryCount() > 1) {
             fragmentManager.popBackStack();
         } else {
-            super.onBackPressed();
+            finish();
         }
     }
 
@@ -42,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.main_fragment_container, fragment, tag)
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .addToBackStack(null)
+                .addToBackStack(tag)
                 .commit();
     }
 

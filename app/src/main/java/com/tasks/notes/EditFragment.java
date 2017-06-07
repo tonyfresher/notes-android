@@ -176,9 +176,10 @@ public class EditFragment extends ColorButtonCreator
     }
 
     @Override
-    public void onBackPressed() {
+    public boolean onBackPressed() {
         saveNote();
-        finish(false);
+        callBack(false);
+        return false;
     }
 
     private void initFromNote() {
@@ -226,13 +227,15 @@ public class EditFragment extends ColorButtonCreator
 
     @OnClick(R.id.edit_exit)
     protected void exit() {
-        finish(false);
+        callBack(false);
+        finish();
     }
 
     @OnClick(R.id.edit_delete)
     protected void deleteAndExit() {
         deleteNote();
-        finish(true);
+        callBack(true);
+        finish();
     }
 
     @OnClick(R.id.edit_save)
@@ -240,10 +243,11 @@ public class EditFragment extends ColorButtonCreator
         saveNote();
         Toast.makeText(getContext(), getString(R.string.note_saved), Toast.LENGTH_SHORT)
                 .show();
-        finish(false);
+        callBack(false);
+        finish();
     }
 
-    private void finish(boolean noteWasDeleted) {
+    private void callBack(boolean noteWasDeleted) {
         if (noteWasDeleted) {
             onChangeListener.onItemRemoved(notePosition);
         } else {
@@ -253,7 +257,9 @@ public class EditFragment extends ColorButtonCreator
                 onChangeListener.onItemChanged(note, notePosition);
             }
         }
+    }
 
+    private void finish() {
         ((MainActivity) getActivity()).removeFragment(this);
     }
 
