@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <group android:checkableBehavior="none">
+
+        <item android:title="Sort">
+            <menu>
+
+                <item
+                    android:id="@+id/list_navigation_view_sort_by_name"
+                    android:icon="@drawable/ic_sort_black_24dp"
+                    android:title="@string/by_title" />
+                <item
+                    android:id="@+id/list_navigation_view_sort_by_created"
+                    android:icon="@drawable/ic_sort_black_24dp"
+                    android:title="@string/by_created" />
+                <item
+                    android:id="@+id/list_navigation_view_sort_by_edited"
+                    android:icon="@drawable/ic_sort_black_24dp"
+                    android:title="@string/by_edited" />
+                <item
+                    android:id="@+id/list_navigation_view_sort_by_viewed"
+                    android:icon="@drawable/ic_sort_black_24dp"
+                    android:title="@string/by_viewed" />
+
+            </menu>
+        </item>
+
+        <item
+            android:id="@+id/list_navigation_view_filter"
+            android:icon="@drawable/ic_filter_list_black_24dp"
+            android:title="@string/filter"
+            app:showAsAction="never" />
+
+        <item android:title="Share">
+            <menu>
+                <item
+                    android:id="@+id/list_navigation_view_import"
+                    android:icon="@drawable/ic_arrow_downward_black_24dp"
+                    android:title="@string/importFile"
+                    app:showAsAction="never" />
+                <item
+                    android:id="@+id/list_navigation_view_export"
+                    android:icon="@drawable/ic_arrow_upward_black_24dp"
+                    android:title="@string/exportToFile"
+                    app:showAsAction="never" />
+            </menu>
+        </item>
+
+        <item android:title="Creation">
+            <menu>
+                <item
+                    android:id="@+id/list_navigation_view_create100000"
+                    android:icon="@drawable/ic_create_black_24dp"
+                    android:title="@string/create100000"
+                    app:showAsAction="never" />
+
+                <item
+                    android:id="@+id/list_navigation_view_clear_all"
+                    android:icon="@drawable/ic_clear_all_black_24dp"
+                    android:title="@string/clear_all"
+                    app:showAsAction="never" />
+
+            </menu>
+        </item>
+
+    </group>
+
+</menu>
